@@ -4,6 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SeanceAI - Talk to History</title>
+    <meta name="description" content="Commune with the minds of history. Have AI-powered conversations with Einstein, Cleopatra, Da Vinci, and other legendary figures.">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="SeanceAI - Talk to History">
+    <meta property="og:description" content="Commune with the minds of history. Have AI-powered conversations with Einstein, Cleopatra, Da Vinci, and other legendary figures.">
+    <meta property="og:image" content="/static/images/og-preview.png">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SeanceAI - Talk to History">
+    <meta name="twitter:description" content="Commune with the minds of history. Have AI-powered conversations with Einstein, Cleopatra, Da Vinci, and other legendary figures.">
+    <meta name="twitter:image" content="/static/images/og-preview.png">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Crimson+Pro:wght@300;400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -13,6 +27,10 @@
     <div class="app-container">
         <!-- Header -->
         <header class="main-header">
+            <button id="theme-toggle" class="theme-toggle" title="Toggle light/dark mode" aria-label="Toggle theme">
+                <span class="theme-icon-dark">☽</span>
+                <span class="theme-icon-light">☀</span>
+            </button>
             <div class="logo">
                 <span class="logo-icon">☽</span>
                 <h1>SeanceAI</h1>
@@ -26,6 +44,29 @@
                 <h2>Choose Your Historical Guide</h2>
                 <p>Select a figure from history to begin your conversation. Each spirit brings wisdom from their era.</p>
             </section>
+
+            <!-- Search and Filter Controls -->
+            <div class="filter-controls">
+                <div class="search-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        placeholder="Search by name..." 
+                        autocomplete="off"
+                    >
+                </div>
+                <div class="era-filter-wrapper">
+                    <select id="era-filter">
+                        <option value="all">All Eras</option>
+                        <option value="Ancient World">Ancient World</option>
+                        <option value="Medieval Era">Medieval Era</option>
+                        <option value="Renaissance">Renaissance</option>
+                        <option value="19th Century">19th Century</option>
+                        <option value="Modern Era">Modern Era</option>
+                    </select>
+                </div>
+            </div>
 
             <div id="figures-grid" class="figures-grid">
                 <!-- Figures will be dynamically loaded here -->
@@ -48,6 +89,9 @@
                 </div>
                 <button id="copy-btn" class="copy-button" title="Copy conversation">
                     <span class="copy-icon">📋</span>
+                </button>
+                <button id="download-btn" class="download-button" title="Download conversation">
+                    <span class="download-icon">⬇</span>
                 </button>
             </div>
 
@@ -92,6 +136,7 @@
         <!-- Footer -->
         <footer class="main-footer">
             <p>SeanceAI &middot; Powered by AI &middot; For educational entertainment only</p>
+            <p class="credit">Implemented by <a href="https://github.com/ARJUNVARMA2000" target="_blank" rel="noopener noreferrer">Arjun Varma</a></p>
         </footer>
     </div>
 

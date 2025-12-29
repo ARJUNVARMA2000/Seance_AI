@@ -4,8 +4,9 @@ Flask application for conversing with historical figures powered by AI.
 """
 
 import os
+import json
 import requests
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, Response
 from dotenv import load_dotenv
 from figures import get_all_figures, get_figure, get_system_prompt
 
@@ -63,6 +64,65 @@ def call_llm(messages: list) -> str:
     except (KeyError, IndexError) as e:
         app.logger.error(f"Unexpected API response format: {e}")
         return "The connection to the past seems unclear. Please try again."
+
+
+def stream_llm(messages: list):
+    """
+    Stream response from OpenRouter API using Server-Sent Events.
+    Yields SSE-formatted chunks as they arrive.
+    """
+    if not OPENROUTER_API_KEY:
+        yield f"data: {json.dumps({'error': 'API key not configured'})}\n\n"
+        return
+    
+    try:
+        response = requests.post(
+            OPENROUTER_URL,
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": request.host_url if request else "http://localhost",
+                "X-Title": "SeanceAI - Talk to History"
+            },
+            json={
+                "model": MODEL,
+                "messages": messages,
+                "max_tokens": 500,
+                "temperature": 0.8,
+                "stream": True
+            },
+            timeout=60,
+            stream=True
+        )
+        
+        response.raise_for_status()
+        
+        for line in response.iter_lines():
+            if line:
+                line_text = line.decode('utf-8')
+                if line_text.startswith('data: '):
+                    data_str = line_text[6:]  # Remove 'data: ' prefix
+                    if data_str.strip() == '[DONE]':
+                        yield f"data: {json.dumps({'done': True})}\n\n"
+                        break
+                    try:
+                        data = json.loads(data_str)
+                        if 'choices' in data and len(data['choices']) > 0:
+                            delta = data['choices'][0].get('delta', {})
+                            content = delta.get('content', '')
+                            if content:
+                                yield f"data: {json.dumps({'content': content})}\n\n"
+                    except json.JSONDecodeError:
+                        continue
+                        
+    except requests.exceptions.Timeout:
+        yield f"data: {json.dumps({'error': 'The spirits seem distant. Please try again.'})}\n\n"
+    except requests.exceptions.RequestException as e:
+        app.logger.error(f"Streaming API request failed: {e}")
+        yield f"data: {json.dumps({'error': 'Connection disrupted. Please try again.'})}\n\n"
+    except Exception as e:
+        app.logger.error(f"Streaming error: {e}")
+        yield f"data: {json.dumps({'error': 'An unexpected error occurred.'})}\n\n"
 
 
 @app.route('/')
@@ -141,6 +201,65 @@ def api_chat():
         
     except Exception as e:
         app.logger.error(f"Chat error: {e}")
+        return jsonify({"error": "An unexpected error occurred. Please try again."}), 500
+
+
+@app.route('/api/chat/stream', methods=['POST'])
+def api_chat_stream():
+    """
+    Handle streaming chat messages using Server-Sent Events.
+    Expects JSON body: { "figure_id": "einstein", "message": "Hello!", "history": [...] }
+    Returns: SSE stream with content chunks
+    """
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+        
+        figure_id = data.get('figure_id')
+        user_message = data.get('message', '').strip()
+        history = data.get('history', [])
+        
+        if not figure_id:
+            return jsonify({"error": "No figure_id provided"}), 400
+        
+        if not user_message:
+            return jsonify({"error": "No message provided"}), 400
+        
+        # Get figure data and system prompt
+        figure = get_figure(figure_id)
+        system_prompt = get_system_prompt(figure_id)
+        
+        if not figure or not system_prompt:
+            return jsonify({"error": "Figure not found"}), 404
+        
+        # Build messages for the API
+        messages = [{"role": "system", "content": system_prompt}]
+        
+        # Add conversation history (limited to last MAX_HISTORY messages)
+        for msg in history[-MAX_HISTORY:]:
+            messages.append({
+                "role": msg.get("role", "user"),
+                "content": msg.get("content", "")
+            })
+        
+        # Add the new user message
+        messages.append({"role": "user", "content": user_message})
+        
+        # Return streaming response
+        return Response(
+            stream_llm(messages),
+            mimetype='text/event-stream',
+            headers={
+                'Cache-Control': 'no-cache',
+                'Connection': 'keep-alive',
+                'X-Accel-Buffering': 'no'
+            }
+        )
+        
+    except Exception as e:
+        app.logger.error(f"Stream chat error: {e}")
         return jsonify({"error": "An unexpected error occurred. Please try again."}), 500
 
 

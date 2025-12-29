@@ -27,15 +27,34 @@ const elements = {
     backBtn: document.getElementById('back-btn'),
     copyBtn: document.getElementById('copy-btn'),
     toast: document.getElementById('toast'),
-    toastMessage: document.getElementById('toast-message')
+    toastMessage: document.getElementById('toast-message'),
+    searchInput: document.getElementById('search-input'),
+    eraFilter: document.getElementById('era-filter'),
+    downloadBtn: document.getElementById('download-btn'),
+    themeToggle: document.getElementById('theme-toggle')
 };
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', init);
 
 async function init() {
+    initTheme();
     await loadFigures();
     setupEventListeners();
+}
+
+// Initialize theme from localStorage
+function initTheme() {
+    const savedTheme = localStorage.getItem('seanceai-theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+    }
+}
+
+// Toggle between light and dark mode
+function toggleTheme() {
+    const isLight = document.body.classList.toggle('light-mode');
+    localStorage.setItem('seanceai-theme', isLight ? 'light' : 'dark');
 }
 
 // Load all historical figures
@@ -57,6 +76,41 @@ function renderFiguresGrid() {
     grid.innerHTML = '';
 
     state.figures.forEach(figure => {
+        const card = createFigureCard(figure);
+        grid.appendChild(card);
+    });
+}
+
+// Filter and render figures based on search and era filter
+function filterFigures() {
+    const searchTerm = elements.searchInput.value.toLowerCase().trim();
+    const selectedEra = elements.eraFilter.value;
+    
+    const filteredFigures = state.figures.filter(figure => {
+        const matchesSearch = searchTerm === '' || 
+            figure.name.toLowerCase().includes(searchTerm) ||
+            figure.tagline.toLowerCase().includes(searchTerm) ||
+            figure.title.toLowerCase().includes(searchTerm);
+        
+        const matchesEra = selectedEra === 'all' || figure.era === selectedEra;
+        
+        return matchesSearch && matchesEra;
+    });
+    
+    const grid = elements.figuresGrid;
+    grid.innerHTML = '';
+    
+    if (filteredFigures.length === 0) {
+        grid.innerHTML = `
+            <div class="no-results">
+                <p>No spirits found matching your search</p>
+                <span>Try adjusting your filters</span>
+            </div>
+        `;
+        return;
+    }
+    
+    filteredFigures.forEach(figure => {
         const card = createFigureCard(figure);
         grid.appendChild(card);
     });
@@ -196,7 +250,7 @@ function scrollToBottom() {
     elements.messages.scrollTop = elements.messages.scrollHeight;
 }
 
-// Send a message to the AI
+// Send a message to the AI with streaming response (with fallback)
 async function sendMessage() {
     const message = elements.messageInput.value.trim();
     if (!message || state.isLoading) return;
@@ -216,37 +270,175 @@ async function sendMessage() {
     state.isLoading = true;
     showTypingIndicator();
     
+    const requestBody = {
+        figure_id: state.currentFigure.id,
+        message: message,
+        history: state.conversationHistory.slice(-20)
+    };
+    
     try {
-        const response = await fetch('/api/chat', {
+        // Try streaming first
+        const streamingSuccessful = await tryStreamingResponse(requestBody);
+        
+        // If streaming didn't produce content, fall back to regular API
+        if (!streamingSuccessful) {
+            console.log('Streaming returned no content, falling back to regular API');
+            await fallbackToRegularChat(requestBody);
+        }
+        
+    } catch (error) {
+        console.error('Chat error:', error);
+        hideTypingIndicator();
+        showToast(error.message || 'Connection lost. Please try again.');
+        addMessage('figure', '*The spirit\'s voice fades momentarily* I apologize, something disrupted our connection. Please try again.');
+    } finally {
+        state.isLoading = false;
+        elements.messageInput.focus();
+    }
+}
+
+// Try streaming response - returns true if successful, false if no content
+async function tryStreamingResponse(requestBody) {
+    try {
+        const response = await fetch('/api/chat/stream', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                figure_id: state.currentFigure.id,
-                message: message,
-                history: state.conversationHistory.slice(-20)
-            })
+            body: JSON.stringify(requestBody)
         });
         
-        const data = await response.json();
-        
-        if (response.ok) {
-            // Add AI response
-            addMessage('figure', data.response);
-            state.conversationHistory.push({ role: 'assistant', content: data.response });
-        } else {
-            showToast(data.error || 'Failed to receive response');
-            addMessage('figure', '*The spirit\'s voice fades momentarily* I apologize, something disrupted our connection. Please try again.');
+        if (!response.ok) {
+            return false;
         }
-    } catch (error) {
-        console.error('Chat error:', error);
-        showToast('Connection lost. Please try again.');
-        addMessage('figure', '*The spirit\'s voice fades momentarily* I apologize, something disrupted our connection. Please try again.');
-    } finally {
-        state.isLoading = false;
+        
+        // Hide typing indicator and create streaming message
         hideTypingIndicator();
-        elements.messageInput.focus();
+        const messageElement = createStreamingMessage();
+        let fullResponse = '';
+        let hasReceivedContent = false;
+        
+        // Read the stream
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split('\n');
+            
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    try {
+                        const data = JSON.parse(line.slice(6));
+                        
+                        if (data.error) {
+                            // Remove the streaming message if no content yet
+                            if (!hasReceivedContent) {
+                                messageElement.remove();
+                                return false;
+                            }
+                            showToast(data.error);
+                            break;
+                        }
+                        
+                        if (data.content) {
+                            hasReceivedContent = true;
+                            fullResponse += data.content;
+                            updateStreamingMessage(messageElement, fullResponse);
+                            scrollToBottom();
+                        }
+                        
+                        if (data.done) {
+                            break;
+                        }
+                    } catch (e) {
+                        // Skip malformed JSON
+                        continue;
+                    }
+                }
+            }
+        }
+        
+        // If we received content, finalize and return success
+        if (hasReceivedContent && fullResponse.trim()) {
+            finalizeStreamingMessage(messageElement, fullResponse);
+            state.conversationHistory.push({ role: 'assistant', content: fullResponse });
+            return true;
+        }
+        
+        // No content received - remove the empty message element
+        messageElement.remove();
+        return false;
+        
+    } catch (error) {
+        console.error('Streaming error:', error);
+        return false;
+    }
+}
+
+// Fallback to regular (non-streaming) chat API
+async function fallbackToRegularChat(requestBody) {
+    showTypingIndicator();
+    
+    const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+    });
+    
+    hideTypingIndicator();
+    
+    const data = await response.json();
+    
+    if (response.ok && data.response) {
+        addMessage('figure', data.response);
+        state.conversationHistory.push({ role: 'assistant', content: data.response });
+    } else {
+        throw new Error(data.error || 'Failed to receive response');
+    }
+}
+
+// Create a streaming message element
+function createStreamingMessage() {
+    const figure = state.currentFigure;
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message figure-message streaming';
+    
+    messageDiv.innerHTML = `
+        <div class="message-portrait">
+            <img src="/static/images/figures/${figure.id}.svg" alt="${figure.name}" onerror="this.src='/static/images/figures/default.svg'">
+        </div>
+        <div class="message-content">
+            <span class="message-author">${figure.name}</span>
+            <p class="streaming-text"><span class="cursor"></span></p>
+        </div>
+    `;
+    
+    elements.messages.appendChild(messageDiv);
+    scrollToBottom();
+    return messageDiv;
+}
+
+// Update streaming message with new content
+function updateStreamingMessage(messageElement, content) {
+    const textElement = messageElement.querySelector('.streaming-text');
+    if (textElement) {
+        textElement.innerHTML = formatMessage(content) + '<span class="cursor"></span>';
+    }
+}
+
+// Finalize the streaming message (remove cursor, clean up)
+function finalizeStreamingMessage(messageElement, content) {
+    messageElement.classList.remove('streaming');
+    const textElement = messageElement.querySelector('.streaming-text');
+    if (textElement) {
+        textElement.innerHTML = formatMessage(content);
+        textElement.classList.remove('streaming-text');
     }
 }
 
@@ -269,11 +461,40 @@ function showStarterQuestions() {
     elements.starterQuestions.classList.remove('hidden');
 }
 
-// View switching
+// View switching with summoning effect
 function showConversationView() {
+    // Check if user prefers reduced motion
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    
     elements.selectionView.classList.remove('active');
+    
+    if (!prefersReducedMotion) {
+        // Add summoning class for enhanced animation
+        elements.conversationView.classList.add('summoning');
+        
+        // Create the summoning circle effect
+        createSummoningEffect();
+        
+        // Remove summoning class after animation completes
+        setTimeout(() => {
+            elements.conversationView.classList.remove('summoning');
+        }, 1000);
+    }
+    
     elements.conversationView.classList.add('active');
     document.body.classList.add('in-conversation');
+}
+
+// Create the mystical summoning circle effect
+function createSummoningEffect() {
+    const effect = document.createElement('div');
+    effect.className = 'summoning-effect';
+    document.body.appendChild(effect);
+    
+    // Remove the effect after animation completes
+    setTimeout(() => {
+        effect.remove();
+    }, 1000);
 }
 
 function showSelectionView() {
@@ -307,6 +528,45 @@ function copyConversation() {
     }).catch(() => {
         showToast('Failed to copy conversation');
     });
+}
+
+// Download conversation as a file
+function downloadConversation() {
+    if (!state.currentFigure || state.conversationHistory.length === 0) {
+        showToast('No conversation to download');
+        return;
+    }
+    
+    const date = new Date().toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    });
+    
+    let content = `# Conversation with ${state.currentFigure.name}\n`;
+    content += `**${state.currentFigure.title}** | ${state.currentFigure.dates}\n`;
+    content += `*Date: ${date}*\n\n`;
+    content += `---\n\n`;
+    
+    state.conversationHistory.forEach(msg => {
+        const author = msg.role === 'user' ? '**You**' : `**${state.currentFigure.name}**`;
+        content += `${author}:\n\n${msg.content}\n\n---\n\n`;
+    });
+    
+    content += `\n*Generated by SeanceAI - Talk to History*`;
+    
+    // Create and download the file
+    const blob = new Blob([content], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `seance-${state.currentFigure.id}-${new Date().toISOString().split('T')[0]}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showToast('Conversation downloaded');
 }
 
 // Toast notifications
@@ -351,6 +611,16 @@ function setupEventListeners() {
     
     // Copy button
     elements.copyBtn.addEventListener('click', copyConversation);
+    
+    // Download button
+    elements.downloadBtn.addEventListener('click', downloadConversation);
+    
+    // Theme toggle
+    elements.themeToggle.addEventListener('click', toggleTheme);
+    
+    // Search and filter
+    elements.searchInput.addEventListener('input', filterFigures);
+    elements.eraFilter.addEventListener('change', filterFigures);
     
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {

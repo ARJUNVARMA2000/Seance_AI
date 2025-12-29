@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgAurelius" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a3d3d"/>
+      <stop offset="100%" style="stop-color:#2a1a1a"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="50" fill="url(#bgAurelius)"/>
+  <!-- Curly Roman hair -->
+  <ellipse cx="50" cy="30" rx="24" ry="18" fill="#5a4a3a"/>
+  <circle cx="32" cy="28" r="6" fill="#5a4a3a"/>
+  <circle cx="68" cy="28" r="6" fill="#5a4a3a"/>
+  <circle cx="40" cy="22" r="5" fill="#5a4a3a"/>
+  <circle cx="60" cy="22" r="5" fill="#5a4a3a"/>
+  <!-- Face -->
+  <ellipse cx="50" cy="45" rx="18" ry="22" fill="#e0c8b0"/>
+  <!-- Beard -->
+  <ellipse cx="50" cy="58" rx="14" ry="10" fill="#5a4a3a"/>
+  <ellipse cx="50" cy="52" rx="16" ry="6" fill="#e0c8b0"/>
+  <!-- Eyes - thoughtful -->
+  <ellipse cx="42" cy="40" rx="3" ry="2" fill="#4a3a2a"/>
+  <ellipse cx="58" cy="40" rx="3" ry="2" fill="#4a3a2a"/>
+  <!-- Roman toga -->
+  <ellipse cx="50" cy="88" rx="26" ry="16" fill="#8b1a1a"/>
+  <!-- Toga drape -->
+  <path d="M 30 75 Q 50 82 70 75" stroke="#f5f0e8" stroke-width="4" fill="none"/>
+  <ellipse cx="50" cy="72" rx="8" ry="4" fill="#e0c8b0"/>
+</svg>
+

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgGandhi" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a3d2d"/>
+      <stop offset="100%" style="stop-color:#302518"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="50" fill="url(#bgGandhi)"/>
+  <!-- Bald head -->
+  <ellipse cx="50" cy="40" rx="22" ry="24" fill="#c4a882"/>
+  <!-- Ears -->
+  <ellipse cx="28" cy="42" rx="5" ry="7" fill="#c4a882"/>
+  <ellipse cx="72" cy="42" rx="5" ry="7" fill="#c4a882"/>
+  <!-- Round glasses -->
+  <circle cx="40" cy="40" r="8" stroke="#4a4a4a" stroke-width="2" fill="none"/>
+  <circle cx="60" cy="40" r="8" stroke="#4a4a4a" stroke-width="2" fill="none"/>
+  <line x1="48" y1="40" x2="52" y2="40" stroke="#4a4a4a" stroke-width="2"/>
+  <!-- Eyes behind glasses -->
+  <circle cx="40" cy="40" r="2" fill="#3a2a1a"/>
+  <circle cx="60" cy="40" r="2" fill="#3a2a1a"/>
+  <!-- Gentle smile -->
+  <path d="M 42 52 Q 50 58 58 52" stroke="#7a6a5a" stroke-width="1.5" fill="none"/>
+  <!-- Simple white cloth -->
+  <ellipse cx="50" cy="85" rx="26" ry="18" fill="#f5f0e8"/>
+  <path d="M 35 70 Q 50 75 65 70" stroke="#e0d8c8" stroke-width="1" fill="none"/>
+</svg>
+
