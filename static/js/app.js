@@ -10,7 +10,12 @@ const state = {
     conversationHistory: [],
     isLoading: false,
     models: [],
-    selectedModel: null
+    selectedModel: null,
+    // Streaming state for smooth rendering
+    streamBuffer: '',
+    streamElement: null,
+    streamAnimationFrame: null,
+    lastRenderTime: 0
 };
 
 // DOM Elements
@@ -422,6 +427,11 @@ async function tryStreamingResponse(requestBody) {
         let fullResponse = '';
         let hasReceivedContent = false;
         
+        // Initialize smooth streaming state
+        state.streamBuffer = '';
+        state.streamElement = messageElement;
+        state.lastRenderTime = performance.now();
+        
         // Read the stream
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
@@ -439,6 +449,8 @@ async function tryStreamingResponse(requestBody) {
                         const data = JSON.parse(line.slice(6));
                         
                         if (data.error) {
+                            // Cancel any pending animation frame
+                            cancelStreamAnimation();
                             // Remove the streaming message if no content yet
                             if (!hasReceivedContent) {
                                 messageElement.remove();
@@ -455,8 +467,8 @@ async function tryStreamingResponse(requestBody) {
                         if (data.content) {
                             hasReceivedContent = true;
                             fullResponse += data.content;
-                            updateStreamingMessage(messageElement, fullResponse);
-                            scrollToBottom();
+                            // Use smooth buffered update instead of direct DOM manipulation
+                            scheduleStreamUpdate(fullResponse);
                         }
                         
                         if (data.done) {
@@ -472,19 +484,72 @@ async function tryStreamingResponse(requestBody) {
         
         // If we received content, finalize and return success
         if (hasReceivedContent && fullResponse.trim()) {
+            // Ensure final render is complete
+            cancelStreamAnimation();
+            flushStreamBuffer(fullResponse);
             finalizeStreamingMessage(messageElement, fullResponse);
             state.conversationHistory.push({ role: 'assistant', content: fullResponse });
             return true;
         }
         
         // No content received - remove the empty message element
+        cancelStreamAnimation();
         messageElement.remove();
         return false;
         
     } catch (error) {
         console.error('Streaming error:', error);
+        cancelStreamAnimation();
         return false;
     }
+}
+
+// Schedule a batched stream update using requestAnimationFrame
+function scheduleStreamUpdate(content) {
+    state.streamBuffer = content;
+    
+    // Only schedule a new frame if one isn't already pending
+    if (!state.streamAnimationFrame) {
+        state.streamAnimationFrame = requestAnimationFrame(() => {
+            renderStreamContent();
+        });
+    }
+}
+
+// Render buffered stream content - called via requestAnimationFrame
+function renderStreamContent() {
+    state.streamAnimationFrame = null;
+    
+    if (state.streamElement && state.streamBuffer) {
+        const textElement = state.streamElement.querySelector('.streaming-text');
+        if (textElement) {
+            // Use a more efficient update strategy
+            const formattedContent = formatMessage(state.streamBuffer);
+            textElement.innerHTML = formattedContent + '<span class="cursor"></span>';
+        }
+        scrollToBottom();
+    }
+}
+
+// Immediately render any buffered content
+function flushStreamBuffer(content) {
+    if (state.streamElement) {
+        const textElement = state.streamElement.querySelector('.streaming-text');
+        if (textElement) {
+            textElement.innerHTML = formatMessage(content) + '<span class="cursor"></span>';
+        }
+        scrollToBottom();
+    }
+}
+
+// Cancel any pending stream animation frame
+function cancelStreamAnimation() {
+    if (state.streamAnimationFrame) {
+        cancelAnimationFrame(state.streamAnimationFrame);
+        state.streamAnimationFrame = null;
+    }
+    state.streamBuffer = '';
+    state.streamElement = null;
 }
 
 // Fallback to regular (non-streaming) chat API
@@ -591,13 +656,25 @@ function displaySuggestions(suggestions, messageElement) {
     scrollToBottom();
 }
 
-// Update streaming message with new content
+// Update streaming message with new content (legacy - used by non-buffered updates)
 function updateStreamingMessage(messageElement, content) {
     const textElement = messageElement.querySelector('.streaming-text');
     if (textElement) {
         textElement.innerHTML = formatMessage(content) + '<span class="cursor"></span>';
     }
 }
+
+// Smooth scroll to bottom with requestAnimationFrame batching
+let scrollPending = false;
+const scrollToBottomSmooth = () => {
+    if (!scrollPending) {
+        scrollPending = true;
+        requestAnimationFrame(() => {
+            elements.messages.scrollTop = elements.messages.scrollHeight;
+            scrollPending = false;
+        });
+    }
+};
 
 // Finalize the streaming message (remove cursor, clean up)
 function finalizeStreamingMessage(messageElement, content) {

@@ -870,14 +870,32 @@ body.in-conversation #conversation-view {
     100% { opacity: 1; }
 }
 
-/* Smooth text appearance */
+/* Smooth text appearance with GPU acceleration */
+.message.streaming .message-content {
+    will-change: contents;
+    contain: layout style;
+}
+
 .message.streaming .message-content p {
     animation: textGlow 2s ease-in-out infinite alternate;
+    /* GPU-accelerated transforms for smoother rendering */
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 @keyframes textGlow {
     from { text-shadow: 0 0 0 transparent; }
     to { text-shadow: 0 0 8px rgba(212, 175, 55, 0.15); }
+}
+
+/* Smooth scroll behavior for messages container during streaming */
+.messages {
+    scroll-behavior: smooth;
+}
+
+/* When streaming, use faster scroll to keep up with content */
+.messages:has(.streaming) {
+    scroll-behavior: auto;
 }
 
 /* ===== Message Suggestions ===== */
