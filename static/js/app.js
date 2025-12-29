@@ -232,8 +232,8 @@ async function selectFigure(figure) {
     clearMessages();
     showConversationView();
     
-    // Add welcome message
-    addMessage('figure', `*The spirit of ${figure.name} materializes before you*\n\nGreetings, traveler through time. I am ${figure.name}, ${figure.title}. What wisdom do you seek from my era?`, true);
+    // Add welcome message (no suggestions - starter questions are shown separately)
+    addMessage('figure', `*The spirit of ${figure.name} materializes before you*\n\nGreetings, traveler through time. I am ${figure.name}, ${figure.title}. What wisdom do you seek from my era?`, false);
     
     elements.messageInput.focus();
 }
@@ -498,7 +498,11 @@ async function fallbackToRegularChat(requestBody) {
     const data = await response.json();
     
     if (response.ok && data.response) {
-        addMessage('figure', data.response, true);
+        // Only show suggestions from 2nd response onwards
+        const assistantCount = state.conversationHistory.filter(m => m.role === 'assistant').length;
+        const showSuggestions = assistantCount >= 1;
+        
+        addMessage('figure', data.response, showSuggestions);
         state.conversationHistory.push({ role: 'assistant', content: data.response });
     } else {
         // Handle error response
@@ -559,21 +563,20 @@ async function fetchSuggestions(lastResponse, messageElement) {
     }
 }
 
-// Display suggestions below a message
+// Display suggestions below a message (styled like starter questions for uniformity)
 function displaySuggestions(suggestions, messageElement) {
     const suggestionsContainer = messageElement.querySelector('.message-suggestions');
     if (!suggestionsContainer) return;
     
     suggestionsContainer.innerHTML = `
-        <div class="suggestions-label">Continue the conversation:</div>
-        <div class="suggestions-buttons"></div>
+        <div class="suggestions-buttons question-buttons"></div>
     `;
     
     const buttonsContainer = suggestionsContainer.querySelector('.suggestions-buttons');
     
     suggestions.forEach(suggestion => {
         const btn = document.createElement('button');
-        btn.className = 'suggestion-btn';
+        btn.className = 'starter-btn';
         btn.textContent = suggestion;
         btn.addEventListener('click', () => {
             elements.messageInput.value = suggestion;
@@ -604,8 +607,11 @@ function finalizeStreamingMessage(messageElement, content) {
         textElement.classList.remove('streaming-text');
     }
     
-    // Add suggestions container and fetch suggestions
-    if (messageContent) {
+    // Only show suggestions from 2nd response onwards
+    // Check if there's already at least 1 assistant response in history
+    const assistantCount = state.conversationHistory.filter(m => m.role === 'assistant').length;
+    
+    if (messageContent && assistantCount >= 1) {
         const suggestionsContainer = document.createElement('div');
         suggestionsContainer.className = 'message-suggestions';
         suggestionsContainer.dataset.messageId = Date.now();
