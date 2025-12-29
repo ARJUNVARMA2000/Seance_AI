@@ -498,11 +498,8 @@ async function fallbackToRegularChat(requestBody) {
     const data = await response.json();
     
     if (response.ok && data.response) {
-        // Only show suggestions from 2nd response onwards
-        const assistantCount = state.conversationHistory.filter(m => m.role === 'assistant').length;
-        const showSuggestions = assistantCount >= 1;
-        
-        addMessage('figure', data.response, showSuggestions);
+        // Show suggestions for all AI responses
+        addMessage('figure', data.response, true);
         state.conversationHistory.push({ role: 'assistant', content: data.response });
     } else {
         // Handle error response
@@ -607,11 +604,8 @@ function finalizeStreamingMessage(messageElement, content) {
         textElement.classList.remove('streaming-text');
     }
     
-    // Only show suggestions from 2nd response onwards
-    // Check if there's already at least 1 assistant response in history
-    const assistantCount = state.conversationHistory.filter(m => m.role === 'assistant').length;
-    
-    if (messageContent && assistantCount >= 1) {
+    // Show suggestions for all AI responses (welcome message is handled separately)
+    if (messageContent) {
         const suggestionsContainer = document.createElement('div');
         suggestionsContainer.className = 'message-suggestions';
         suggestionsContainer.dataset.messageId = Date.now();
