@@ -384,8 +384,15 @@ async function sendMessage() {
     } catch (error) {
         console.error('Chat error:', error);
         hideTypingIndicator();
-        showToast(error.message || 'Connection lost. Please try again.');
-        addMessage('figure', '*The spirit\'s voice fades momentarily* I apologize, something disrupted our connection. Please try again.');
+        const errorMessage = error.message || 'Connection lost. Please try again.';
+        showToast(errorMessage);
+        
+        // Show a more helpful error message if it's an API key issue
+        if (errorMessage.toLowerCase().includes('api key') || errorMessage.toLowerCase().includes('not configured')) {
+            addMessage('figure', '*The connection to the spirit realm is blocked*\n\nI apologize, but the API key is not configured. Please check your Railway environment variables and ensure OPENROUTER_API_KEY is set correctly.');
+        } else {
+            addMessage('figure', '*The spirit\'s voice fades momentarily*\n\nI apologize, something disrupted our connection. Please try again.');
+        }
     } finally {
         state.isLoading = false;
         elements.messageInput.focus();
@@ -494,7 +501,10 @@ async function fallbackToRegularChat(requestBody) {
         addMessage('figure', data.response, true);
         state.conversationHistory.push({ role: 'assistant', content: data.response });
     } else {
-        throw new Error(data.error || 'Failed to receive response');
+        // Handle error response
+        const errorMessage = data.error || 'Failed to receive response';
+        console.error('Chat API error:', errorMessage);
+        throw new Error(errorMessage);
     }
 }
 

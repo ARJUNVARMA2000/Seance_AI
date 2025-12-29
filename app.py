@@ -3,9 +3,17 @@ SeanceAI - Talk to History
 Flask application for conversing with historical figures powered by AI.
 """
 
+# Patch gevent for async support (must be done before other imports)
+try:
+    from gevent import monkey
+    monkey.patch_all()
+except ImportError:
+    pass  # gevent not installed (local dev)
+
 import os
 import json
 import requests
+from typing import Tuple
 from flask import Flask, render_template, jsonify, request, Response
 from dotenv import load_dotenv
 from figures import get_all_figures, get_figure, get_system_prompt
@@ -39,23 +47,26 @@ AVAILABLE_MODELS = [
 ]
 
 
-def call_llm(messages: list, model: str = None) -> str:
+def call_llm(messages: list, model: str = None) -> Tuple[str, bool]:
     """
     Call the OpenRouter API with the given messages.
-    Returns the AI response text or an error message.
+    Returns a tuple: (response_text, is_error)
+    If is_error is True, response_text contains an error message.
     """
     if not OPENROUTER_API_KEY:
-        return "Error: OpenRouter API key not configured. Please set the OPENROUTER_API_KEY environment variable."
+        app.logger.error("OPENROUTER_API_KEY is not set")
+        return ("OpenRouter API key not configured. Please set the OPENROUTER_API_KEY environment variable.", True)
     
     selected_model = model or DEFAULT_MODEL
     
     try:
+        app.logger.info(f"Calling OpenRouter API with model: {selected_model}")
         response = requests.post(
             OPENROUTER_URL,
             headers={
                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
                 "Content-Type": "application/json",
-                "HTTP-Referer": request.host_url,
+                "HTTP-Referer": request.host_url if request else "http://localhost",
                 "X-Title": "SeanceAI - Talk to History"
             },
             json={
@@ -67,22 +78,38 @@ def call_llm(messages: list, model: str = None) -> str:
             timeout=30
         )
         
+        app.logger.info(f"OpenRouter API response status: {response.status_code}")
+        
         response.raise_for_status()
         data = response.json()
         
         if "choices" in data and len(data["choices"]) > 0:
-            return data["choices"][0]["message"]["content"]
+            content = data["choices"][0]["message"]["content"]
+            app.logger.info("Successfully received response from OpenRouter API")
+            return (content, False)
         else:
-            return "I apologize, but I seem to be having trouble formulating my thoughts. Could you perhaps rephrase your question?"
+            app.logger.warning("OpenRouter API returned no choices in response")
+            return ("I apologize, but I seem to be having trouble formulating my thoughts. Could you perhaps rephrase your question?", True)
             
     except requests.exceptions.Timeout:
-        return "The spirits seem distant at the moment. Please try again in a moment."
+        app.logger.error("OpenRouter API request timed out")
+        return ("The spirits seem distant at the moment. Please try again in a moment.", True)
+    except requests.exceptions.HTTPError as e:
+        app.logger.error(f"OpenRouter API HTTP error: {e} - Status: {e.response.status_code if e.response else 'unknown'}")
+        if e.response:
+            try:
+                error_data = e.response.json()
+                error_msg = error_data.get('error', {}).get('message', str(e))
+                app.logger.error(f"OpenRouter API error details: {error_msg}")
+            except:
+                pass
+        return ("I apologize, but something has disrupted our connection. Please check your API key configuration.", True)
     except requests.exceptions.RequestException as e:
-        app.logger.error(f"API request failed: {e}")
-        return "I apologize, but something has disrupted our connection. Please try again."
+        app.logger.error(f"OpenRouter API request failed: {e}")
+        return ("I apologize, but something has disrupted our connection. Please try again.", True)
     except (KeyError, IndexError) as e:
         app.logger.error(f"Unexpected API response format: {e}")
-        return "The connection to the past seems unclear. Please try again."
+        return ("The connection to the past seems unclear. Please try again.", True)
 
 
 def stream_llm(messages: list, model: str = None):
@@ -91,12 +118,14 @@ def stream_llm(messages: list, model: str = None):
     Yields SSE-formatted chunks as they arrive.
     """
     if not OPENROUTER_API_KEY:
-        yield f"data: {json.dumps({'error': 'API key not configured'})}\n\n"
+        app.logger.error("OPENROUTER_API_KEY is not set for streaming")
+        yield f"data: {json.dumps({'error': 'OpenRouter API key not configured. Please set the OPENROUTER_API_KEY environment variable.'})}\n\n"
         return
     
     selected_model = model or DEFAULT_MODEL
     
     try:
+        app.logger.info(f"Streaming request to OpenRouter API with model: {selected_model}")
         response = requests.post(
             OPENROUTER_URL,
             headers={
@@ -116,6 +145,7 @@ def stream_llm(messages: list, model: str = None):
             stream=True
         )
         
+        app.logger.info(f"OpenRouter API streaming response status: {response.status_code}")
         response.raise_for_status()
         
         for line in response.iter_lines():
@@ -137,7 +167,20 @@ def stream_llm(messages: list, model: str = None):
                         continue
                         
     except requests.exceptions.Timeout:
+        app.logger.error("OpenRouter API streaming request timed out")
         yield f"data: {json.dumps({'error': 'The spirits seem distant. Please try again.'})}\n\n"
+    except requests.exceptions.HTTPError as e:
+        app.logger.error(f"OpenRouter API streaming HTTP error: {e} - Status: {e.response.status_code if e.response else 'unknown'}")
+        if e.response:
+            try:
+                error_data = e.response.json()
+                error_msg = error_data.get('error', {}).get('message', 'Connection disrupted. Please check your API key configuration.')
+                app.logger.error(f"OpenRouter API error details: {error_msg}")
+                yield f"data: {json.dumps({'error': error_msg})}\n\n"
+            except:
+                yield f"data: {json.dumps({'error': 'Connection disrupted. Please check your API key configuration.'})}\n\n"
+        else:
+            yield f"data: {json.dumps({'error': 'Connection disrupted. Please check your API key configuration.'})}\n\n"
     except requests.exceptions.RequestException as e:
         app.logger.error(f"Streaming API request failed: {e}")
         yield f"data: {json.dumps({'error': 'Connection disrupted. Please try again.'})}\n\n"
@@ -173,6 +216,22 @@ def api_figure(figure_id):
 def api_models():
     """Return list of available AI models."""
     return jsonify({"models": AVAILABLE_MODELS, "default": DEFAULT_MODEL})
+
+
+@app.route('/api/health')
+def api_health():
+    """Health check endpoint for Railway monitoring."""
+    health_status = {
+        "status": "healthy",
+        "api_key_configured": bool(OPENROUTER_API_KEY),
+        "api_key_length": len(OPENROUTER_API_KEY) if OPENROUTER_API_KEY else 0
+    }
+    
+    if not OPENROUTER_API_KEY:
+        health_status["status"] = "degraded"
+        health_status["warning"] = "OPENROUTER_API_KEY is not set"
+    
+    return jsonify(health_status)
 
 
 @app.route('/api/chat', methods=['POST'])
@@ -220,12 +279,18 @@ def api_chat():
         messages.append({"role": "user", "content": user_message})
         
         # Get AI response
-        ai_response = call_llm(messages, model)
+        ai_response, is_error = call_llm(messages, model)
         
-        return jsonify({
-            "response": ai_response,
-            "figure": figure
-        })
+        if is_error:
+            return jsonify({
+                "error": ai_response,
+                "figure": figure
+            }), 500
+        else:
+            return jsonify({
+                "response": ai_response,
+                "figure": figure
+            })
         
     except Exception as e:
         app.logger.error(f"Chat error: {e}")
@@ -348,7 +413,11 @@ Generate ONLY the questions, one per line, without numbering or bullets. Return 
         ]
         
         # Use a fast model for suggestions
-        response_text = call_llm(messages, model or DEFAULT_MODEL)
+        response_text, is_error = call_llm(messages, model or DEFAULT_MODEL)
+        
+        # If there's an error, use fallback suggestions
+        if is_error:
+            app.logger.warning(f"Failed to generate suggestions: {response_text}")
         
         # Parse the response into individual questions
         suggestions = []
