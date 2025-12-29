@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgCaesar" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a2a2a"/>
+      <stop offset="100%" style="stop-color:#2a1515"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="50" fill="url(#bgCaesar)"/>
+  <!-- Laurel wreath -->
+  <ellipse cx="50" cy="30" rx="24" ry="18" fill="none" stroke="#d4af37" stroke-width="3"/>
+  <path d="M30 35 Q35 25 40 30" stroke="#6b8e23" stroke-width="3" fill="none"/>
+  <path d="M35 28 Q40 20 45 25" stroke="#6b8e23" stroke-width="3" fill="none"/>
+  <path d="M70 35 Q65 25 60 30" stroke="#6b8e23" stroke-width="3" fill="none"/>
+  <path d="M65 28 Q60 20 55 25" stroke="#6b8e23" stroke-width="3" fill="none"/>
+  <!-- Face - Roman profile -->
+  <ellipse cx="50" cy="48" rx="18" ry="22" fill="#d4b89c"/>
+  <!-- Short Roman hair -->
+  <ellipse cx="50" cy="32" rx="18" ry="10" fill="#4a3a2a"/>
+  <!-- Strong brow -->
+  <path d="M35 40 L45 38 L55 38 L65 40" stroke="#4a3a2a" stroke-width="2" fill="none"/>
+  <!-- Eyes -->
+  <circle cx="42" cy="45" r="2.5" fill="#4a3728"/>
+  <circle cx="58" cy="45" r="2.5" fill="#4a3728"/>
+  <!-- Roman nose -->
+  <path d="M50 45 L53 55 L47 55" fill="#c4a888"/>
+  <!-- Stern mouth -->
+  <line x1="44" y1="60" x2="56" y2="60" stroke="#8b6b55" stroke-width="2"/>
+  <!-- Red toga -->
+  <ellipse cx="50" cy="88" rx="26" ry="16" fill="#8b2222"/>
+  <path d="M30 78 Q50 72 70 78" stroke="#a83232" stroke-width="4" fill="none"/>
+</svg>
+

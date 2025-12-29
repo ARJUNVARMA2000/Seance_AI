@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgEinstein" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2d3a4a"/>
+      <stop offset="100%" style="stop-color:#1a2530"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="50" fill="url(#bgEinstein)"/>
+  <!-- Wild hair -->
+  <ellipse cx="50" cy="32" rx="28" ry="22" fill="#8b8b8b"/>
+  <ellipse cx="30" cy="28" rx="10" ry="14" fill="#8b8b8b" transform="rotate(-20 30 28)"/>
+  <ellipse cx="70" cy="28" rx="10" ry="14" fill="#8b8b8b" transform="rotate(20 70 28)"/>
+  <!-- Face -->
+  <ellipse cx="50" cy="45" rx="20" ry="22" fill="#e8d4c4"/>
+  <!-- Mustache -->
+  <ellipse cx="50" cy="56" rx="12" ry="5" fill="#6b6b6b"/>
+  <!-- Eyes -->
+  <circle cx="42" cy="42" r="3" fill="#4a3728"/>
+  <circle cx="58" cy="42" r="3" fill="#4a3728"/>
+  <!-- Body -->
+  <ellipse cx="50" cy="85" rx="22" ry="18" fill="#4a4a5a"/>
+</svg>
+

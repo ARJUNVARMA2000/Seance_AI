@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgTesla" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a2a3a"/>
+      <stop offset="100%" style="stop-color:#0d1520"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="50" fill="url(#bgTesla)"/>
+  <!-- Electric glow effect -->
+  <circle cx="50" cy="50" r="48" fill="none" stroke="#4a90d9" stroke-width="1" opacity="0.3"/>
+  <!-- Slicked back dark hair -->
+  <ellipse cx="50" cy="28" rx="20" ry="12" fill="#1a1a1a"/>
+  <path d="M30 35 Q35 20 50 18 Q65 20 70 35" fill="#1a1a1a"/>
+  <!-- Face - tall and thin -->
+  <ellipse cx="50" cy="48" rx="17" ry="24" fill="#e8dcd0"/>
+  <!-- Distinctive mustache -->
+  <path d="M38 54 Q50 58 62 54" stroke="#1a1a1a" stroke-width="4" fill="none"/>
+  <!-- Intense eyes -->
+  <ellipse cx="42" cy="44" rx="4" ry="3" fill="#eee"/>
+  <circle cx="42" cy="44" r="2" fill="#2a4a6a"/>
+  <ellipse cx="58" cy="44" rx="4" ry="3" fill="#eee"/>
+  <circle cx="58" cy="44" r="2" fill="#2a4a6a"/>
+  <!-- Strong eyebrows -->
+  <line x1="36" y1="39" x2="48" y2="40" stroke="#1a1a1a" stroke-width="2"/>
+  <line x1="52" y1="40" x2="64" y2="39" stroke="#1a1a1a" stroke-width="2"/>
+  <!-- Formal suit -->
+  <ellipse cx="50" cy="88" rx="24" ry="16" fill="#1a1a2a"/>
+  <rect x="46" y="72" width="8" height="18" fill="#ffffff"/>
+  <circle cx="50" cy="76" r="2" fill="#1a1a1a"/>
+</svg>
+

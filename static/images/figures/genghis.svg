@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgGenghis" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3a2a1a"/>
+      <stop offset="100%" style="stop-color:#1a1408"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="50" fill="url(#bgGenghis)"/>
+  <!-- Mongol fur hat -->
+  <ellipse cx="50" cy="22" rx="26" ry="14" fill="#4a3a2a"/>
+  <ellipse cx="50" cy="18" rx="22" ry="8" fill="#6b5a4a"/>
+  <rect x="28" y="18" width="44" height="12" fill="#4a3a2a"/>
+  <!-- Face - weathered -->
+  <ellipse cx="50" cy="48" rx="18" ry="20" fill="#c4a070"/>
+  <!-- Long thin mustache -->
+  <path d="M35 55 L50 52 L65 55" stroke="#2a2a2a" stroke-width="2" fill="none"/>
+  <line x1="35" y1="55" x2="28" y2="62" stroke="#2a2a2a" stroke-width="2"/>
+  <line x1="65" y1="55" x2="72" y2="62" stroke="#2a2a2a" stroke-width="2"/>
+  <!-- Goatee -->
+  <ellipse cx="50" cy="62" rx="5" ry="8" fill="#2a2a2a"/>
+  <!-- Narrow eyes -->
+  <path d="M36 45 L46 44 L36 43" fill="#2a1a0a"/>
+  <path d="M64 45 L54 44 L64 43" fill="#2a1a0a"/>
+  <!-- Stern expression lines -->
+  <line x1="44" y1="38" x2="48" y2="40" stroke="#a08060" stroke-width="1"/>
+  <line x1="56" y1="38" x2="52" y2="40" stroke="#a08060" stroke-width="1"/>
+  <!-- Armor collar -->
+  <ellipse cx="50" cy="85" rx="26" ry="16" fill="#6b6b6b"/>
+  <rect x="35" y="72" width="30" height="10" fill="#8b8b8b"/>
+  <line x1="35" y1="75" x2="65" y2="75" stroke="#5a5a5a" stroke-width="2"/>
+  <line x1="35" y1="79" x2="65" y2="79" stroke="#5a5a5a" stroke-width="2"/>
+</svg>
+

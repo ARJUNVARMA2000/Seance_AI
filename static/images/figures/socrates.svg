@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgSocrates" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a4a3a"/>
+      <stop offset="100%" style="stop-color:#2a2a20"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="50" fill="url(#bgSocrates)"/>
+  <!-- Bald head -->
+  <ellipse cx="50" cy="40" rx="22" ry="24" fill="#d4b89c"/>
+  <!-- Curly beard -->
+  <ellipse cx="50" cy="68" rx="18" ry="16" fill="#8b8b8b"/>
+  <circle cx="38" cy="62" r="5" fill="#8b8b8b"/>
+  <circle cx="62" cy="62" r="5" fill="#8b8b8b"/>
+  <circle cx="42" cy="72" r="4" fill="#8b8b8b"/>
+  <circle cx="58" cy="72" r="4" fill="#8b8b8b"/>
+  <!-- Wild eyebrows -->
+  <path d="M32 38 Q40 32 48 38" stroke="#8b8b8b" stroke-width="4" fill="none"/>
+  <path d="M52 38 Q60 32 68 38" stroke="#8b8b8b" stroke-width="4" fill="none"/>
+  <!-- Deep-set eyes -->
+  <circle cx="42" cy="44" r="3" fill="#4a3728"/>
+  <circle cx="58" cy="44" r="3" fill="#4a3728"/>
+  <!-- Snub nose -->
+  <circle cx="50" cy="52" r="6" fill="#c4a888"/>
+  <!-- Simple robe -->
+  <ellipse cx="50" cy="92" rx="28" ry="14" fill="#c4b89c"/>
+  <path d="M28 85 Q50 75 72 85" stroke="#a09880" stroke-width="3" fill="none"/>
+</svg>
+
