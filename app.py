@@ -18,17 +18,31 @@ app = Flask(__name__)
 # Configuration
 OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY')
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-MODEL = "meta-llama/llama-3.1-8b-instruct:free"
+DEFAULT_MODEL = "mistralai/mistral-7b-instruct:free"
 MAX_HISTORY = 20  # Maximum number of messages to keep in history
 
+# Available models - mix of free and affordable options
+AVAILABLE_MODELS = [
+    {"id": "mistralai/mistral-7b-instruct:free", "name": "Mistral 7B", "tier": "free"},
+    {"id": "google/gemma-2-9b-it:free", "name": "Gemma 2 9B", "tier": "free"},
+    {"id": "meta-llama/llama-3.2-3b-instruct:free", "name": "Llama 3.2 3B", "tier": "free"},
+    {"id": "qwen/qwen-2-7b-instruct:free", "name": "Qwen 2 7B", "tier": "free"},
+    {"id": "openchat/openchat-7b:free", "name": "OpenChat 7B", "tier": "free"},
+    {"id": "anthropic/claude-3-haiku", "name": "Claude 3 Haiku", "tier": "cheap"},
+    {"id": "openai/gpt-4o-mini", "name": "GPT-4o Mini", "tier": "cheap"},
+    {"id": "google/gemini-flash-1.5", "name": "Gemini 1.5 Flash", "tier": "cheap"},
+]
 
-def call_llm(messages: list) -> str:
+
+def call_llm(messages: list, model: str = None) -> str:
     """
     Call the OpenRouter API with the given messages.
     Returns the AI response text or an error message.
     """
     if not OPENROUTER_API_KEY:
         return "Error: OpenRouter API key not configured. Please set the OPENROUTER_API_KEY environment variable."
+    
+    selected_model = model or DEFAULT_MODEL
     
     try:
         response = requests.post(
@@ -40,7 +54,7 @@ def call_llm(messages: list) -> str:
                 "X-Title": "SeanceAI - Talk to History"
             },
             json={
-                "model": MODEL,
+                "model": selected_model,
                 "messages": messages,
                 "max_tokens": 500,
                 "temperature": 0.8
@@ -66,7 +80,7 @@ def call_llm(messages: list) -> str:
         return "The connection to the past seems unclear. Please try again."
 
 
-def stream_llm(messages: list):
+def stream_llm(messages: list, model: str = None):
     """
     Stream response from OpenRouter API using Server-Sent Events.
     Yields SSE-formatted chunks as they arrive.
@@ -74,6 +88,8 @@ def stream_llm(messages: list):
     if not OPENROUTER_API_KEY:
         yield f"data: {json.dumps({'error': 'API key not configured'})}\n\n"
         return
+    
+    selected_model = model or DEFAULT_MODEL
     
     try:
         response = requests.post(
@@ -85,7 +101,7 @@ def stream_llm(messages: list):
                 "X-Title": "SeanceAI - Talk to History"
             },
             json={
-                "model": MODEL,
+                "model": selected_model,
                 "messages": messages,
                 "max_tokens": 500,
                 "temperature": 0.8,
@@ -148,6 +164,12 @@ def api_figure(figure_id):
         return jsonify({"error": "Figure not found"}), 404
 
 
+@app.route('/api/models')
+def api_models():
+    """Return list of available AI models."""
+    return jsonify({"models": AVAILABLE_MODELS, "default": DEFAULT_MODEL})
+
+
 @app.route('/api/chat', methods=['POST'])
 def api_chat():
     """
@@ -164,6 +186,7 @@ def api_chat():
         figure_id = data.get('figure_id')
         user_message = data.get('message', '').strip()
         history = data.get('history', [])
+        model = data.get('model')  # Optional model override
         
         if not figure_id:
             return jsonify({"error": "No figure_id provided"}), 400
@@ -192,7 +215,7 @@ def api_chat():
         messages.append({"role": "user", "content": user_message})
         
         # Get AI response
-        ai_response = call_llm(messages)
+        ai_response = call_llm(messages, model)
         
         return jsonify({
             "response": ai_response,
@@ -220,6 +243,7 @@ def api_chat_stream():
         figure_id = data.get('figure_id')
         user_message = data.get('message', '').strip()
         history = data.get('history', [])
+        model = data.get('model')  # Optional model override
         
         if not figure_id:
             return jsonify({"error": "No figure_id provided"}), 400
@@ -249,7 +273,7 @@ def api_chat_stream():
         
         # Return streaming response
         return Response(
-            stream_llm(messages),
+            stream_llm(messages, model),
             mimetype='text/event-stream',
             headers={
                 'Cache-Control': 'no-cache',

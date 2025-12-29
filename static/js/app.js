@@ -8,7 +8,9 @@ const state = {
     figures: [],
     currentFigure: null,
     conversationHistory: [],
-    isLoading: false
+    isLoading: false,
+    models: [],
+    selectedModel: null
 };
 
 // DOM Elements
@@ -31,7 +33,8 @@ const elements = {
     searchInput: document.getElementById('search-input'),
     eraFilter: document.getElementById('era-filter'),
     downloadBtn: document.getElementById('download-btn'),
-    themeToggle: document.getElementById('theme-toggle')
+    themeToggle: document.getElementById('theme-toggle'),
+    modelSelector: document.getElementById('model-selector')
 };
 
 // Initialize app
@@ -39,7 +42,7 @@ document.addEventListener('DOMContentLoaded', init);
 
 async function init() {
     initTheme();
-    await loadFigures();
+    await Promise.all([loadFigures(), loadModels()]);
     setupEventListeners();
 }
 
@@ -68,6 +71,62 @@ async function loadFigures() {
         console.error('Failed to load figures:', error);
         showError('Failed to summon the spirits. Please refresh the page.');
     }
+}
+
+// Load available AI models
+async function loadModels() {
+    try {
+        const response = await fetch('/api/models');
+        const data = await response.json();
+        state.models = data.models;
+        state.selectedModel = localStorage.getItem('seanceai-model') || data.default;
+        renderModelSelector();
+    } catch (error) {
+        console.error('Failed to load models:', error);
+    }
+}
+
+// Render the model selector dropdown
+function renderModelSelector() {
+    const selector = elements.modelSelector;
+    selector.innerHTML = '';
+    
+    // Group models by tier
+    const freeModels = state.models.filter(m => m.tier === 'free');
+    const cheapModels = state.models.filter(m => m.tier === 'cheap');
+    
+    if (freeModels.length > 0) {
+        const freeGroup = document.createElement('optgroup');
+        freeGroup.label = '✨ Free Models';
+        freeModels.forEach(model => {
+            const option = document.createElement('option');
+            option.value = model.id;
+            option.textContent = model.name;
+            option.selected = model.id === state.selectedModel;
+            freeGroup.appendChild(option);
+        });
+        selector.appendChild(freeGroup);
+    }
+    
+    if (cheapModels.length > 0) {
+        const cheapGroup = document.createElement('optgroup');
+        cheapGroup.label = '💎 Premium (Low Cost)';
+        cheapModels.forEach(model => {
+            const option = document.createElement('option');
+            option.value = model.id;
+            option.textContent = model.name;
+            option.selected = model.id === state.selectedModel;
+            cheapGroup.appendChild(option);
+        });
+        selector.appendChild(cheapGroup);
+    }
+}
+
+// Handle model selection change
+function handleModelChange() {
+    state.selectedModel = elements.modelSelector.value;
+    localStorage.setItem('seanceai-model', state.selectedModel);
+    showToast(`Switched to ${elements.modelSelector.options[elements.modelSelector.selectedIndex].text}`);
 }
 
 // Render the figures selection grid
@@ -273,7 +332,8 @@ async function sendMessage() {
     const requestBody = {
         figure_id: state.currentFigure.id,
         message: message,
-        history: state.conversationHistory.slice(-20)
+        history: state.conversationHistory.slice(-20),
+        model: state.selectedModel
     };
     
     try {
@@ -617,6 +677,9 @@ function setupEventListeners() {
     
     // Theme toggle
     elements.themeToggle.addEventListener('click', toggleTheme);
+    
+    // Model selector
+    elements.modelSelector.addEventListener('change', handleModelChange);
     
     // Search and filter
     elements.searchInput.addEventListener('input', filterFigures);
