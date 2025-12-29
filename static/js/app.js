@@ -233,7 +233,7 @@ async function selectFigure(figure) {
     showConversationView();
     
     // Add welcome message
-    addMessage('figure', `*The spirit of ${figure.name} materializes before you*\n\nGreetings, traveler through time. I am ${figure.name}, ${figure.title}. What wisdom do you seek from my era?`);
+    addMessage('figure', `*The spirit of ${figure.name} materializes before you*\n\nGreetings, traveler through time. I am ${figure.name}, ${figure.title}. What wisdom do you seek from my era?`, true);
     
     elements.messageInput.focus();
 }
@@ -271,21 +271,35 @@ function renderStarterQuestions() {
 }
 
 // Add a message to the chat
-function addMessage(role, content) {
+function addMessage(role, content, showSuggestions = false) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${role}-message`;
     
     if (role === 'figure') {
         const figure = state.currentFigure;
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
+        
+        messageContent.innerHTML = `
+            <span class="message-author">${figure.name}</span>
+            <p>${formatMessage(content)}</p>
+        `;
+        
         messageDiv.innerHTML = `
             <div class="message-portrait">
                 <img src="/static/images/figures/${figure.id}.svg" alt="${figure.name}" onerror="this.src='/static/images/figures/default.svg'">
             </div>
-            <div class="message-content">
-                <span class="message-author">${figure.name}</span>
-                <p>${formatMessage(content)}</p>
-            </div>
         `;
+        
+        messageDiv.appendChild(messageContent);
+        
+        // Add suggestions container if this is a figure message
+        if (showSuggestions) {
+            const suggestionsContainer = document.createElement('div');
+            suggestionsContainer.className = 'message-suggestions';
+            suggestionsContainer.dataset.messageId = Date.now();
+            messageContent.appendChild(suggestionsContainer);
+        }
     } else {
         messageDiv.innerHTML = `
             <div class="message-content">
@@ -297,6 +311,13 @@ function addMessage(role, content) {
     
     elements.messages.appendChild(messageDiv);
     scrollToBottom();
+    
+    // Fetch suggestions if this is a figure message and we should show them
+    if (role === 'figure' && showSuggestions) {
+        fetchSuggestions(content, messageDiv);
+    }
+    
+    return messageDiv;
 }
 
 // Format message text (handle line breaks and italics)
@@ -470,7 +491,7 @@ async function fallbackToRegularChat(requestBody) {
     const data = await response.json();
     
     if (response.ok && data.response) {
-        addMessage('figure', data.response);
+        addMessage('figure', data.response, true);
         state.conversationHistory.push({ role: 'assistant', content: data.response });
     } else {
         throw new Error(data.error || 'Failed to receive response');
@@ -498,6 +519,62 @@ function createStreamingMessage() {
     return messageDiv;
 }
 
+// Fetch and display contextual suggestions
+async function fetchSuggestions(lastResponse, messageElement) {
+    if (!state.currentFigure || !lastResponse) return;
+    
+    try {
+        const response = await fetch('/api/suggestions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                figure_id: state.currentFigure.id,
+                history: state.conversationHistory,
+                last_response: lastResponse,
+                model: state.selectedModel
+            })
+        });
+        
+        if (!response.ok) return;
+        
+        const data = await response.json();
+        if (data.suggestions && data.suggestions.length > 0) {
+            displaySuggestions(data.suggestions, messageElement);
+        }
+    } catch (error) {
+        console.error('Failed to fetch suggestions:', error);
+        // Silently fail - suggestions are optional
+    }
+}
+
+// Display suggestions below a message
+function displaySuggestions(suggestions, messageElement) {
+    const suggestionsContainer = messageElement.querySelector('.message-suggestions');
+    if (!suggestionsContainer) return;
+    
+    suggestionsContainer.innerHTML = `
+        <div class="suggestions-label">Continue the conversation:</div>
+        <div class="suggestions-buttons"></div>
+    `;
+    
+    const buttonsContainer = suggestionsContainer.querySelector('.suggestions-buttons');
+    
+    suggestions.forEach(suggestion => {
+        const btn = document.createElement('button');
+        btn.className = 'suggestion-btn';
+        btn.textContent = suggestion;
+        btn.addEventListener('click', () => {
+            elements.messageInput.value = suggestion;
+            sendMessage();
+        });
+        buttonsContainer.appendChild(btn);
+    });
+    
+    scrollToBottom();
+}
+
 // Update streaming message with new content
 function updateStreamingMessage(messageElement, content) {
     const textElement = messageElement.querySelector('.streaming-text');
@@ -510,9 +587,20 @@ function updateStreamingMessage(messageElement, content) {
 function finalizeStreamingMessage(messageElement, content) {
     messageElement.classList.remove('streaming');
     const textElement = messageElement.querySelector('.streaming-text');
+    const messageContent = messageElement.querySelector('.message-content');
+    
     if (textElement) {
         textElement.innerHTML = formatMessage(content);
         textElement.classList.remove('streaming-text');
+    }
+    
+    // Add suggestions container and fetch suggestions
+    if (messageContent) {
+        const suggestionsContainer = document.createElement('div');
+        suggestionsContainer.className = 'message-suggestions';
+        suggestionsContainer.dataset.messageId = Date.now();
+        messageContent.appendChild(suggestionsContainer);
+        fetchSuggestions(content, messageElement);
     }
 }
 

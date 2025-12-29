@@ -860,6 +860,60 @@ body.light-mode .theme-toggle .theme-icon-light {
     to { text-shadow: 0 0 8px rgba(212, 175, 55, 0.15); }
 }
 
+/* ===== Message Suggestions ===== */
+.message-suggestions {
+    margin-top: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--border-subtle);
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.suggestions-label {
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: var(--space-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.suggestions-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+}
+
+.suggestion-btn {
+    padding: var(--space-xs) var(--space-md);
+    background: transparent;
+    border: 1px solid var(--border-accent);
+    border-radius: 16px;
+    color: var(--accent-gold);
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.suggestion-btn:hover {
+    background: rgba(212, 175, 55, 0.1);
+    border-color: var(--accent-gold);
+    transform: translateY(-1px);
+}
+
+.suggestion-btn:active {
+    transform: translateY(0);
+}
+
 /* ===== Starter Questions ===== */
 .starter-questions {
     background: var(--bg-secondary);

@@ -292,6 +292,102 @@ def api_chat_stream():
         return jsonify({"error": "An unexpected error occurred. Please try again."}), 500
 
 
+@app.route('/api/suggestions', methods=['POST'])
+def api_suggestions():
+    """
+    Generate contextual follow-up questions based on conversation history.
+    Expects JSON body: { "figure_id": "einstein", "history": [...], "last_response": "..." }
+    Returns: { "suggestions": ["question1", "question2", ...] }
+    """
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+        
+        figure_id = data.get('figure_id')
+        history = data.get('history', [])
+        last_response = data.get('last_response', '')
+        model = data.get('model')  # Optional model override
+        
+        if not figure_id:
+            return jsonify({"error": "No figure_id provided"}), 400
+        
+        # Get figure data
+        figure = get_figure(figure_id)
+        if not figure:
+            return jsonify({"error": "Figure not found"}), 404
+        
+        # Build a prompt to generate contextual questions
+        conversation_context = ""
+        if history:
+            # Include last few exchanges for context
+            recent_history = history[-4:] if len(history) > 4 else history
+            for msg in recent_history:
+                role = "User" if msg.get("role") == "user" else figure['name']
+                conversation_context += f"{role}: {msg.get('content', '')}\n\n"
+        
+        if last_response:
+            conversation_context += f"{figure['name']}: {last_response}\n\n"
+        
+        suggestion_prompt = f"""Based on this conversation with {figure['name']}, generate 3-4 engaging follow-up questions that a user might ask to continue the conversation naturally. The questions should:
+1. Be contextually relevant to what was just discussed
+2. Be engaging and encourage deeper conversation
+3. Be phrased as if the user is speaking directly to {figure['name']}
+4. Vary in depth and topic
+5. Be concise (one sentence each)
+
+Conversation so far:
+{conversation_context}
+
+Generate ONLY the questions, one per line, without numbering or bullets. Return them as a simple list."""
+
+        messages = [
+            {"role": "system", "content": "You are a helpful assistant that generates engaging conversation questions. Return only the questions, one per line."},
+            {"role": "user", "content": suggestion_prompt}
+        ]
+        
+        # Use a fast model for suggestions
+        response_text = call_llm(messages, model or DEFAULT_MODEL)
+        
+        # Parse the response into individual questions
+        suggestions = []
+        for line in response_text.strip().split('\n'):
+            line = line.strip()
+            # Remove numbering/bullets if present
+            line = line.lstrip('0123456789.-•* ').strip()
+            if line and len(line) > 10:  # Filter out very short lines
+                suggestions.append(line)
+        
+        # Limit to 4 suggestions
+        suggestions = suggestions[:4]
+        
+        # If we didn't get good suggestions, provide some generic ones
+        if not suggestions:
+            suggestions = [
+                f"Tell me more about that.",
+                f"What was your perspective on that?",
+                f"How did that affect you?",
+                f"What would you like to discuss next?"
+            ]
+        
+        return jsonify({"suggestions": suggestions})
+        
+    except Exception as e:
+        app.logger.error(f"Suggestions error: {e}")
+        # Return generic fallback suggestions
+        figure = get_figure(data.get('figure_id', ''))
+        figure_name = figure['name'] if figure else "the spirit"
+        return jsonify({
+            "suggestions": [
+                "Tell me more about that.",
+                "What was your perspective on that?",
+                "How did that affect you?",
+                "What would you like to discuss next?"
+            ]
+        })
+
+
 @app.errorhandler(404)
 def not_found(e):
     """Handle 404 errors."""
