@@ -387,9 +387,11 @@ async function sendMessage() {
         const errorMessage = error.message || 'Connection lost. Please try again.';
         showToast(errorMessage);
         
-        // Show a more helpful error message if it's an API key issue
+        // Show a more helpful error message based on error type
         if (errorMessage.toLowerCase().includes('api key') || errorMessage.toLowerCase().includes('not configured')) {
             addMessage('figure', '*The connection to the spirit realm is blocked*\n\nI apologize, but the API key is not configured. Please check your Railway environment variables and ensure OPENROUTER_API_KEY is set correctly.');
+        } else if (errorMessage.toLowerCase().includes('overwhelmed') || errorMessage.toLowerCase().includes('rate') || errorMessage.toLowerCase().includes('visitors')) {
+            addMessage('figure', '*The spirit realm is experiencing heavy traffic*\n\nThe ethereal pathways are crowded at the moment. Please wait a few seconds and try again, or try selecting a different AI model from the dropdown menu above.');
         } else {
             addMessage('figure', '*The spirit\'s voice fades momentarily*\n\nI apologize, something disrupted our connection. Please try again.');
         }
@@ -440,6 +442,10 @@ async function tryStreamingResponse(requestBody) {
                             // Remove the streaming message if no content yet
                             if (!hasReceivedContent) {
                                 messageElement.remove();
+                                // Check if it's a rate limit error
+                                if (data.rate_limited || data.error.toLowerCase().includes('overwhelmed') || data.error.toLowerCase().includes('visitors')) {
+                                    throw new Error('The spirits are overwhelmed with visitors. Please wait a moment and try again.');
+                                }
                                 return false;
                             }
                             showToast(data.error);

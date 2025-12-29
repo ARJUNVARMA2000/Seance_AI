@@ -12,6 +12,7 @@ except ImportError:
 
 import os
 import json
+import time
 import requests
 from typing import Tuple
 from flask import Flask, render_template, jsonify, request, Response
@@ -28,6 +29,18 @@ OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY')
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 DEFAULT_MODEL = "google/gemini-2.0-flash-exp:free"
 MAX_HISTORY = 20  # Maximum number of messages to keep in history
+
+# Rate limit handling configuration
+MAX_RETRIES = 3
+RETRY_DELAYS = [2, 5, 10]  # Exponential backoff delays in seconds
+
+# Fallback models when primary model is rate-limited (in order of preference)
+FALLBACK_MODELS = [
+    "meta-llama/llama-3.3-70b-instruct:free",
+    "qwen/qwen-2.5-72b-instruct:free",
+    "mistralai/mistral-small-3.1-24b-instruct:free",
+    "deepseek/deepseek-r1:free",
+]
 
 # Available models - mix of free and premium
 AVAILABLE_MODELS = [
@@ -47,9 +60,81 @@ AVAILABLE_MODELS = [
 ]
 
 
+def _make_api_request(messages: list, model: str, timeout: int = 30, stream: bool = False):
+    """
+    Make a single API request to OpenRouter.
+    Returns (response, error_info) tuple.
+    error_info is None on success, or a dict with 'status_code', 'is_rate_limit', 'message'.
+    """
+    try:
+        response = requests.post(
+            OPENROUTER_URL,
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": request.host_url if request else "http://localhost",
+                "X-Title": "SeanceAI - Talk to History"
+            },
+            json={
+                "model": model,
+                "messages": messages,
+                "max_tokens": 500,
+                "temperature": 0.8,
+                **({"stream": True} if stream else {})
+            },
+            timeout=timeout,
+            stream=stream
+        )
+        
+        # Check for rate limiting before raise_for_status
+        if response.status_code == 429:
+            error_msg = "Rate limited"
+            try:
+                error_data = response.json()
+                error_msg = error_data.get('error', {}).get('metadata', {}).get('raw', error_msg)
+            except:
+                pass
+            return None, {
+                'status_code': 429,
+                'is_rate_limit': True,
+                'message': error_msg
+            }
+        
+        response.raise_for_status()
+        return response, None
+        
+    except requests.exceptions.Timeout:
+        return None, {
+            'status_code': None,
+            'is_rate_limit': False,
+            'message': 'Request timed out'
+        }
+    except requests.exceptions.HTTPError as e:
+        status_code = e.response.status_code if e.response else None
+        error_msg = str(e)
+        try:
+            if e.response:
+                error_data = e.response.json()
+                error_msg = error_data.get('error', {}).get('message', str(e))
+        except:
+            pass
+        return None, {
+            'status_code': status_code,
+            'is_rate_limit': status_code == 429,
+            'message': error_msg
+        }
+    except requests.exceptions.RequestException as e:
+        return None, {
+            'status_code': None,
+            'is_rate_limit': False,
+            'message': str(e)
+        }
+
+
 def call_llm(messages: list, model: str = None) -> Tuple[str, bool]:
     """
     Call the OpenRouter API with the given messages.
+    Includes retry logic with exponential backoff and model fallback for rate limits.
     Returns a tuple: (response_text, is_error)
     If is_error is True, response_text contains an error message.
     """
@@ -58,63 +143,71 @@ def call_llm(messages: list, model: str = None) -> Tuple[str, bool]:
         return ("OpenRouter API key not configured. Please set the OPENROUTER_API_KEY environment variable.", True)
     
     selected_model = model or DEFAULT_MODEL
+    models_to_try = [selected_model] + [m for m in FALLBACK_MODELS if m != selected_model]
     
-    try:
-        app.logger.info(f"Calling OpenRouter API with model: {selected_model}")
-        response = requests.post(
-            OPENROUTER_URL,
-            headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "Content-Type": "application/json",
-                "HTTP-Referer": request.host_url if request else "http://localhost",
-                "X-Title": "SeanceAI - Talk to History"
-            },
-            json={
-                "model": selected_model,
-                "messages": messages,
-                "max_tokens": 500,
-                "temperature": 0.8
-            },
-            timeout=30
-        )
+    last_error = None
+    
+    for model_index, current_model in enumerate(models_to_try):
+        app.logger.info(f"Trying model: {current_model} (attempt {model_index + 1}/{len(models_to_try)})")
         
-        app.logger.info(f"OpenRouter API response status: {response.status_code}")
-        
-        response.raise_for_status()
-        data = response.json()
-        
-        if "choices" in data and len(data["choices"]) > 0:
-            content = data["choices"][0]["message"]["content"]
-            app.logger.info("Successfully received response from OpenRouter API")
-            return (content, False)
-        else:
-            app.logger.warning("OpenRouter API returned no choices in response")
-            return ("I apologize, but I seem to be having trouble formulating my thoughts. Could you perhaps rephrase your question?", True)
+        # Retry loop for current model
+        for retry in range(MAX_RETRIES):
+            app.logger.info(f"Calling OpenRouter API with model: {current_model} (retry {retry + 1}/{MAX_RETRIES})")
             
-    except requests.exceptions.Timeout:
-        app.logger.error("OpenRouter API request timed out")
+            response, error_info = _make_api_request(messages, current_model)
+            
+            if response is not None:
+                # Success! Parse the response
+                try:
+                    data = response.json()
+                    if "choices" in data and len(data["choices"]) > 0:
+                        content = data["choices"][0]["message"]["content"]
+                        app.logger.info(f"Successfully received response from {current_model}")
+                        return (content, False)
+                    else:
+                        app.logger.warning("OpenRouter API returned no choices in response")
+                        return ("I apologize, but I seem to be having trouble formulating my thoughts. Could you perhaps rephrase your question?", True)
+                except (KeyError, IndexError, json.JSONDecodeError) as e:
+                    app.logger.error(f"Unexpected API response format: {e}")
+                    return ("The connection to the past seems unclear. Please try again.", True)
+            
+            # Handle error
+            last_error = error_info
+            
+            if error_info['is_rate_limit']:
+                app.logger.warning(f"Rate limited on {current_model}: {error_info['message']}")
+                
+                # If this is not the last retry, wait before retrying
+                if retry < MAX_RETRIES - 1:
+                    delay = RETRY_DELAYS[min(retry, len(RETRY_DELAYS) - 1)]
+                    app.logger.info(f"Waiting {delay}s before retry...")
+                    time.sleep(delay)
+                else:
+                    # Last retry for this model, try next model
+                    app.logger.info(f"Max retries reached for {current_model}, trying next model...")
+                    break
+            else:
+                # Non-rate-limit error, don't retry
+                app.logger.error(f"API error: {error_info['message']}")
+                break
+    
+    # All models and retries exhausted
+    if last_error and last_error['is_rate_limit']:
+        app.logger.error("All models rate-limited")
+        return ("The spirits are overwhelmed with visitors right now. Please wait a moment and try again, or select a different AI model from the dropdown.", True)
+    elif last_error and last_error.get('status_code') == 401:
+        return ("I apologize, but your API key appears to be invalid. Please check your configuration.", True)
+    elif last_error and 'timed out' in last_error.get('message', '').lower():
         return ("The spirits seem distant at the moment. Please try again in a moment.", True)
-    except requests.exceptions.HTTPError as e:
-        app.logger.error(f"OpenRouter API HTTP error: {e} - Status: {e.response.status_code if e.response else 'unknown'}")
-        if e.response:
-            try:
-                error_data = e.response.json()
-                error_msg = error_data.get('error', {}).get('message', str(e))
-                app.logger.error(f"OpenRouter API error details: {error_msg}")
-            except:
-                pass
-        return ("I apologize, but something has disrupted our connection. Please check your API key configuration.", True)
-    except requests.exceptions.RequestException as e:
-        app.logger.error(f"OpenRouter API request failed: {e}")
+    else:
+        app.logger.error(f"All attempts failed. Last error: {last_error}")
         return ("I apologize, but something has disrupted our connection. Please try again.", True)
-    except (KeyError, IndexError) as e:
-        app.logger.error(f"Unexpected API response format: {e}")
-        return ("The connection to the past seems unclear. Please try again.", True)
 
 
 def stream_llm(messages: list, model: str = None):
     """
     Stream response from OpenRouter API using Server-Sent Events.
+    Includes retry logic with model fallback for rate limits.
     Yields SSE-formatted chunks as they arrive.
     """
     if not OPENROUTER_API_KEY:
@@ -123,70 +216,86 @@ def stream_llm(messages: list, model: str = None):
         return
     
     selected_model = model or DEFAULT_MODEL
+    models_to_try = [selected_model] + [m for m in FALLBACK_MODELS if m != selected_model]
     
-    try:
-        app.logger.info(f"Streaming request to OpenRouter API with model: {selected_model}")
-        response = requests.post(
-            OPENROUTER_URL,
-            headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "Content-Type": "application/json",
-                "HTTP-Referer": request.host_url if request else "http://localhost",
-                "X-Title": "SeanceAI - Talk to History"
-            },
-            json={
-                "model": selected_model,
-                "messages": messages,
-                "max_tokens": 500,
-                "temperature": 0.8,
-                "stream": True
-            },
-            timeout=60,
-            stream=True
-        )
+    last_error = None
+    success = False
+    
+    for model_index, current_model in enumerate(models_to_try):
+        if success:
+            break
+            
+        app.logger.info(f"Streaming: trying model {current_model} (attempt {model_index + 1}/{len(models_to_try)})")
         
-        app.logger.info(f"OpenRouter API streaming response status: {response.status_code}")
-        response.raise_for_status()
-        
-        for line in response.iter_lines():
-            if line:
-                line_text = line.decode('utf-8')
-                if line_text.startswith('data: '):
-                    data_str = line_text[6:]  # Remove 'data: ' prefix
-                    if data_str.strip() == '[DONE]':
-                        yield f"data: {json.dumps({'done': True})}\n\n"
-                        break
-                    try:
-                        data = json.loads(data_str)
-                        if 'choices' in data and len(data['choices']) > 0:
-                            delta = data['choices'][0].get('delta', {})
-                            content = delta.get('content', '')
-                            if content:
-                                yield f"data: {json.dumps({'content': content})}\n\n"
-                    except json.JSONDecodeError:
-                        continue
+        for retry in range(MAX_RETRIES):
+            if success:
+                break
+                
+            app.logger.info(f"Streaming request to OpenRouter API with model: {current_model} (retry {retry + 1}/{MAX_RETRIES})")
+            
+            response, error_info = _make_api_request(messages, current_model, timeout=60, stream=True)
+            
+            if response is not None:
+                # Success! Stream the response
+                try:
+                    for line in response.iter_lines():
+                        if line:
+                            line_text = line.decode('utf-8')
+                            if line_text.startswith('data: '):
+                                data_str = line_text[6:]  # Remove 'data: ' prefix
+                                if data_str.strip() == '[DONE]':
+                                    yield f"data: {json.dumps({'done': True})}\n\n"
+                                    success = True
+                                    break
+                                try:
+                                    data = json.loads(data_str)
+                                    if 'choices' in data and len(data['choices']) > 0:
+                                        delta = data['choices'][0].get('delta', {})
+                                        content = delta.get('content', '')
+                                        if content:
+                                            yield f"data: {json.dumps({'content': content})}\n\n"
+                                            success = True  # Mark as success once we get content
+                                except json.JSONDecodeError:
+                                    continue
+                    
+                    if success:
+                        return  # Exit completely on success
                         
-    except requests.exceptions.Timeout:
-        app.logger.error("OpenRouter API streaming request timed out")
-        yield f"data: {json.dumps({'error': 'The spirits seem distant. Please try again.'})}\n\n"
-    except requests.exceptions.HTTPError as e:
-        app.logger.error(f"OpenRouter API streaming HTTP error: {e} - Status: {e.response.status_code if e.response else 'unknown'}")
-        if e.response:
-            try:
-                error_data = e.response.json()
-                error_msg = error_data.get('error', {}).get('message', 'Connection disrupted. Please check your API key configuration.')
-                app.logger.error(f"OpenRouter API error details: {error_msg}")
-                yield f"data: {json.dumps({'error': error_msg})}\n\n"
-            except:
-                yield f"data: {json.dumps({'error': 'Connection disrupted. Please check your API key configuration.'})}\n\n"
+                except Exception as e:
+                    app.logger.error(f"Streaming read error: {e}")
+                    last_error = {'message': str(e), 'is_rate_limit': False}
+                    break
+            else:
+                # Handle error
+                last_error = error_info
+                
+                if error_info['is_rate_limit']:
+                    app.logger.warning(f"Streaming rate limited on {current_model}: {error_info['message']}")
+                    
+                    # If this is not the last retry, wait before retrying
+                    if retry < MAX_RETRIES - 1:
+                        delay = RETRY_DELAYS[min(retry, len(RETRY_DELAYS) - 1)]
+                        app.logger.info(f"Waiting {delay}s before retry...")
+                        time.sleep(delay)
+                    else:
+                        # Last retry for this model, try next model
+                        app.logger.info(f"Max retries reached for {current_model}, trying next model...")
+                        break
+                else:
+                    # Non-rate-limit error, don't retry
+                    app.logger.error(f"Streaming API error: {error_info['message']}")
+                    break
+    
+    # All models and retries exhausted - yield error
+    if not success:
+        if last_error and last_error.get('is_rate_limit'):
+            app.logger.error("Streaming: All models rate-limited")
+            yield f"data: {json.dumps({'error': 'The spirits are overwhelmed with visitors. Please wait a moment and try again, or select a different AI model.', 'rate_limited': True})}\n\n"
+        elif last_error and 'timed out' in last_error.get('message', '').lower():
+            yield f"data: {json.dumps({'error': 'The spirits seem distant. Please try again.'})}\n\n"
         else:
-            yield f"data: {json.dumps({'error': 'Connection disrupted. Please check your API key configuration.'})}\n\n"
-    except requests.exceptions.RequestException as e:
-        app.logger.error(f"Streaming API request failed: {e}")
-        yield f"data: {json.dumps({'error': 'Connection disrupted. Please try again.'})}\n\n"
-    except Exception as e:
-        app.logger.error(f"Streaming error: {e}")
-        yield f"data: {json.dumps({'error': 'An unexpected error occurred.'})}\n\n"
+            app.logger.error(f"Streaming: All attempts failed. Last error: {last_error}")
+            yield f"data: {json.dumps({'error': 'Connection disrupted. Please try again.'})}\n\n"
 
 
 @app.route('/')
