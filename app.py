@@ -5,6 +5,7 @@ Flask application for conversing with historical figures powered by AI.
 
 import os
 import json
+import logging
 import requests
 from flask import Flask, render_template, jsonify, request, Response
 from dotenv import load_dotenv
@@ -14,6 +15,22 @@ from figures import get_all_figures, get_figure, get_system_prompt
 load_dotenv()
 
 app = Flask(__name__)
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# Add CORS headers for better compatibility
+@app.after_request
+def after_request(response):
+    """Add CORS and security headers."""
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    return response
 
 # Configuration
 OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY')
@@ -81,10 +98,15 @@ def call_llm(messages: list, model: str = None) -> str:
     except requests.exceptions.Timeout:
         return "The spirits seem distant at the moment. Please try again in a moment."
     except requests.exceptions.RequestException as e:
-        app.logger.error(f"API request failed: {e}")
+        logger.error(f"API request failed: {e}")
+        # Log more details in debug mode
+        if app.debug:
+            logger.error(f"Request details: {e.response.text if hasattr(e, 'response') and e.response else 'No response'}")
         return "I apologize, but something has disrupted our connection. Please try again."
     except (KeyError, IndexError) as e:
-        app.logger.error(f"Unexpected API response format: {e}")
+        logger.error(f"Unexpected API response format: {e}")
+        if app.debug:
+            logger.error(f"Response data: {data if 'data' in locals() else 'No data'}")
         return "The connection to the past seems unclear. Please try again."
 
 
@@ -142,10 +164,12 @@ def stream_llm(messages: list, model: str = None):
     except requests.exceptions.Timeout:
         yield f"data: {json.dumps({'error': 'The spirits seem distant. Please try again.'})}\n\n"
     except requests.exceptions.RequestException as e:
-        app.logger.error(f"Streaming API request failed: {e}")
+        logger.error(f"Streaming API request failed: {e}")
+        if app.debug:
+            logger.error(f"Request details: {e.response.text if hasattr(e, 'response') and e.response else 'No response'}")
         yield f"data: {json.dumps({'error': 'Connection disrupted. Please try again.'})}\n\n"
     except Exception as e:
-        app.logger.error(f"Streaming error: {e}")
+        logger.error(f"Streaming error: {e}", exc_info=True)
         yield f"data: {json.dumps({'error': 'An unexpected error occurred.'})}\n\n"
 
 
@@ -176,6 +200,20 @@ def api_figure(figure_id):
 def api_models():
     """Return list of available AI models."""
     return jsonify({"models": AVAILABLE_MODELS, "default": DEFAULT_MODEL})
+
+
+@app.route('/api/health')
+def api_health():
+    """Health check endpoint."""
+    api_key_set = bool(OPENROUTER_API_KEY)
+    figures_count = len(get_all_figures())
+    
+    return jsonify({
+        "status": "healthy",
+        "api_key_configured": api_key_set,
+        "figures_available": figures_count,
+        "models_available": len(AVAILABLE_MODELS)
+    })
 
 
 @app.route('/api/chat', methods=['POST'])
@@ -231,7 +269,7 @@ def api_chat():
         })
         
     except Exception as e:
-        app.logger.error(f"Chat error: {e}")
+        logger.error(f"Chat error: {e}", exc_info=True)
         return jsonify({"error": "An unexpected error occurred. Please try again."}), 500
 
 
@@ -291,24 +329,54 @@ def api_chat_stream():
         )
         
     except Exception as e:
-        app.logger.error(f"Stream chat error: {e}")
+        logger.error(f"Stream chat error: {e}", exc_info=True)
         return jsonify({"error": "An unexpected error occurred. Please try again."}), 500
 
 
 @app.errorhandler(404)
 def not_found(e):
     """Handle 404 errors."""
-    return jsonify({"error": "Not found"}), 404
+    # Return HTML for browser requests, JSON for API requests
+    if request.path.startswith('/api/'):
+        return jsonify({"error": "Not found", "path": request.path}), 404
+    # For non-API routes, return a simple HTML error page
+    return render_template('index.html'), 404
 
 
 @app.errorhandler(500)
 def server_error(e):
     """Handle 500 errors."""
-    return jsonify({"error": "Internal server error"}), 500
+    logger.error(f"Server error: {e}", exc_info=True)
+    if request.path.startswith('/api/'):
+        return jsonify({"error": "Internal server error"}), 500
+    return render_template('index.html'), 500
+
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    """Handle all unhandled exceptions."""
+    logger.error(f"Unhandled exception: {e}", exc_info=True)
+    if request.path.startswith('/api/'):
+        return jsonify({"error": "An unexpected error occurred"}), 500
+    return render_template('index.html'), 500
 
 
 if __name__ == '__main__':
     debug = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
     port = int(os.environ.get('PORT', 5000))
+    
+    # Log startup information
+    logger.info("=" * 60)
+    logger.info("SeanceAI - Starting Flask Server")
+    logger.info("=" * 60)
+    logger.info(f"Port: {port}")
+    logger.info(f"Debug mode: {debug}")
+    logger.info(f"API key configured: {bool(OPENROUTER_API_KEY)}")
+    logger.info(f"Figures available: {len(get_all_figures())}")
+    logger.info(f"Models available: {len(AVAILABLE_MODELS)}")
+    logger.info("=" * 60)
+    logger.info(f"Access the website at: http://localhost:{port}")
+    logger.info("=" * 60)
+    
     app.run(debug=debug, host='0.0.0.0', port=port)
 
