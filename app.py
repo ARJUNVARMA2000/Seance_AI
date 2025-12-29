@@ -18,19 +18,27 @@ app = Flask(__name__)
 # Configuration
 OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY')
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-DEFAULT_MODEL = "mistralai/mistral-7b-instruct:free"
+DEFAULT_MODEL = "google/gemini-2.0-flash-exp:free"
 MAX_HISTORY = 20  # Maximum number of messages to keep in history
 
-# Available models - mix of free and affordable options
+# Available models - top weekly models from OpenRouter (mix of free and premium)
 AVAILABLE_MODELS = [
-    {"id": "mistralai/mistral-7b-instruct:free", "name": "Mistral 7B", "tier": "free"},
-    {"id": "google/gemma-2-9b-it:free", "name": "Gemma 2 9B", "tier": "free"},
-    {"id": "meta-llama/llama-3.2-3b-instruct:free", "name": "Llama 3.2 3B", "tier": "free"},
-    {"id": "qwen/qwen-2-7b-instruct:free", "name": "Qwen 2 7B", "tier": "free"},
-    {"id": "openchat/openchat-7b:free", "name": "OpenChat 7B", "tier": "free"},
-    {"id": "anthropic/claude-3-haiku", "name": "Claude 3 Haiku", "tier": "cheap"},
+    # Free tier - great for testing
+    {"id": "google/gemini-2.0-flash-exp:free", "name": "Gemini 2.0 Flash (Free)", "tier": "free"},
+    {"id": "meta-llama/llama-3.3-70b-instruct:free", "name": "Llama 3.3 70B (Free)", "tier": "free"},
+    {"id": "deepseek/deepseek-r1:free", "name": "DeepSeek R1 (Free)", "tier": "free"},
+    {"id": "qwen/qwen-2.5-72b-instruct:free", "name": "Qwen 2.5 72B (Free)", "tier": "free"},
+    {"id": "mistralai/mistral-small-3.1-24b-instruct:free", "name": "Mistral Small 3.1 (Free)", "tier": "free"},
+    # Affordable premium - best value
+    {"id": "google/gemini-2.0-flash-001", "name": "Gemini 2.0 Flash", "tier": "cheap"},
     {"id": "openai/gpt-4o-mini", "name": "GPT-4o Mini", "tier": "cheap"},
-    {"id": "google/gemini-flash-1.5", "name": "Gemini 1.5 Flash", "tier": "cheap"},
+    {"id": "anthropic/claude-3.5-haiku", "name": "Claude 3.5 Haiku", "tier": "cheap"},
+    {"id": "deepseek/deepseek-chat", "name": "DeepSeek V3", "tier": "cheap"},
+    # Premium tier - top quality
+    {"id": "anthropic/claude-sonnet-4", "name": "Claude Sonnet 4", "tier": "premium"},
+    {"id": "openai/gpt-4o", "name": "GPT-4o", "tier": "premium"},
+    {"id": "google/gemini-2.5-pro-preview", "name": "Gemini 2.5 Pro", "tier": "premium"},
+    {"id": "anthropic/claude-opus-4", "name": "Claude Opus 4", "tier": "premium"},
 ]
 
 

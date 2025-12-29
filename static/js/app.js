@@ -94,6 +94,7 @@ function renderModelSelector() {
     // Group models by tier
     const freeModels = state.models.filter(m => m.tier === 'free');
     const cheapModels = state.models.filter(m => m.tier === 'cheap');
+    const premiumModels = state.models.filter(m => m.tier === 'premium');
     
     if (freeModels.length > 0) {
         const freeGroup = document.createElement('optgroup');
@@ -110,7 +111,7 @@ function renderModelSelector() {
     
     if (cheapModels.length > 0) {
         const cheapGroup = document.createElement('optgroup');
-        cheapGroup.label = '💎 Premium (Low Cost)';
+        cheapGroup.label = '💰 Affordable';
         cheapModels.forEach(model => {
             const option = document.createElement('option');
             option.value = model.id;
@@ -119,6 +120,19 @@ function renderModelSelector() {
             cheapGroup.appendChild(option);
         });
         selector.appendChild(cheapGroup);
+    }
+    
+    if (premiumModels.length > 0) {
+        const premiumGroup = document.createElement('optgroup');
+        premiumGroup.label = '👑 Premium';
+        premiumModels.forEach(model => {
+            const option = document.createElement('option');
+            option.value = model.id;
+            option.textContent = model.name;
+            option.selected = model.id === state.selectedModel;
+            premiumGroup.appendChild(option);
+        });
+        selector.appendChild(premiumGroup);
     }
 }
 

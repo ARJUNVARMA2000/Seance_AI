@@ -42,8 +42,10 @@ HISTORICAL_FIGURES = {
         "tagline": "Father of Relativity, Nobel Laureate",
         "starter_questions": [
             "What inspired your theory of relativity?",
-            "What do you think about the technology of today?",
-            "Did you really fail math class?"
+            "How did you feel when you learned your work contributed to the atomic bomb?",
+            "Did you really fail math class, and what was school like for you?",
+            "What was your relationship with Niels Bohr like during your quantum debates?",
+            "What would you think about machines that can learn and 'think' for themselves?"
         ]
     },
     "cleopatra": {
@@ -58,8 +60,10 @@ HISTORICAL_FIGURES = {
         "tagline": "Last Pharaoh of Egypt, Legendary Queen",
         "starter_questions": [
             "What was it like ruling the most powerful kingdom of your time?",
-            "Tell me about your relationship with Julius Caesar.",
-            "How did you maintain power in a world dominated by men?"
+            "Tell me about your relationship with Julius Caesar and Mark Antony.",
+            "How did you maintain power in a world dominated by men?",
+            "What was your strategy when Rome threatened Egypt's independence?",
+            "What would you say to modern women leading nations and corporations today?"
         ]
     },
     "davinci": {
@@ -73,9 +77,11 @@ HISTORICAL_FIGURES = {
         "beliefs": "Believed in learning through direct observation of nature. Valued the unity of art and science. Kept detailed notebooks and believed in documenting everything. Skeptical of accepted wisdom that hadn't been verified through experience. Saw beauty in mathematical proportions and natural forms.",
         "tagline": "Renaissance Master, Universal Genius",
         "starter_questions": [
-            "How did you come up with the ideas for your inventions?",
+            "How did you come up with the ideas for your flying machines?",
             "What was the secret behind the Mona Lisa's smile?",
-            "If you could have finished one project, which would it be?"
+            "Why did you leave so many projects unfinished?",
+            "What did you learn from dissecting human bodies?",
+            "What would you create if you had access to modern technology like 3D printing and drones?"
         ]
     },
     "lincoln": {
@@ -91,7 +97,9 @@ HISTORICAL_FIGURES = {
         "starter_questions": [
             "How did you find the strength to lead during the Civil War?",
             "What does freedom mean to you?",
-            "How did you go from a log cabin to the White House?"
+            "How did you go from a log cabin to the White House?",
+            "What was your relationship with Frederick Douglass like?",
+            "What would you say about the deep political divisions in America today?"
         ]
     },
     "curie": {
@@ -105,9 +113,11 @@ HISTORICAL_FIGURES = {
         "beliefs": "Believed science belongs to all humanity and should be freely shared. Advocated for women's education and rights. Valued persistence and hard work above natural talent. Believed in the practical applications of scientific discovery for human benefit. Dedicated to truth through rigorous experimentation.",
         "tagline": "Pioneer of Radioactivity, First Woman Nobel Laureate",
         "starter_questions": [
-            "What was it like discovering radioactivity?",
+            "What was it like the moment you discovered radium?",
             "How did you overcome the barriers facing women in science?",
-            "What drove your relentless dedication to research?"
+            "What drove your relentless dedication to research despite the toll on your health?",
+            "How did you feel winning two Nobel Prizes in different sciences?",
+            "What advice would you give to young women pursuing careers in STEM today?"
         ]
     },
     "caesar": {
@@ -122,8 +132,10 @@ HISTORICAL_FIGURES = {
         "tagline": "Conqueror of Gaul, Dictator of Rome",
         "starter_questions": [
             "What was crossing the Rubicon really like?",
-            "Do you regret trusting Brutus?",
-            "How did you maintain the loyalty of your legions?"
+            "Do you regret trusting Brutus and the conspirators?",
+            "How did you maintain the loyalty of your legions for so many years?",
+            "What reforms did you implement to help the common people of Rome?",
+            "What would you think of modern democracies that still struggle with political polarization and populism?"
         ]
     },
     "shakespeare": {
@@ -137,9 +149,11 @@ HISTORICAL_FIGURES = {
         "beliefs": "Believed in the power of storytelling to illuminate truth. Valued the complexity of human nature - no one is purely good or evil. Interested in questions of ambition, love, jealousy, and mortality. Saw theater as a mirror held up to nature. Respected tradition while innovating within it.",
         "tagline": "The Bard of Avon, Greatest Writer in English",
         "starter_questions": [
-            "Which of your plays is closest to your heart?",
-            "What inspired you to write such complex villains?",
-            "Is it true you invented so many words we still use?"
+            "Which of your plays is closest to your heart and why?",
+            "What inspired you to write such complex villains like Iago and Richard III?",
+            "Is it true you invented so many words we still use today?",
+            "What was performing at the Globe Theatre really like?",
+            "What would you think of your plays being turned into Hollywood films and streaming series?"
         ]
     },
     "tesla": {
@@ -154,8 +168,10 @@ HISTORICAL_FIGURES = {
         "tagline": "Master of Electricity, Visionary Inventor",
         "starter_questions": [
             "What was your rivalry with Edison really about?",
-            "Did you really envision smartphones and the internet?",
-            "Why did you give up your royalties for AC power?"
+            "Did you really envision smartphones and wireless communication?",
+            "Why did you give up your royalties for AC power to Westinghouse?",
+            "What was your vision for Wardenclyffe Tower and wireless energy?",
+            "What do you think about the electric car company named Tesla in your honor?"
         ]
     },
     "socrates": {
@@ -171,7 +187,9 @@ HISTORICAL_FIGURES = {
         "starter_questions": [
             "Why do you ask so many questions instead of giving answers?",
             "What is the meaning of a good life?",
-            "Why did you accept your death sentence?"
+            "Why did you accept your death sentence instead of fleeing?",
+            "What did you think of the Athenian democracy that condemned you?",
+            "What would you say about social media where people only hear opinions they already agree with?"
         ]
     },
     "genghis": {
@@ -185,9 +203,11 @@ HISTORICAL_FIGURES = {
         "beliefs": "Believed in religious tolerance and meritocracy within his empire. Valued loyalty, discipline, and unity among the Mongol people. Believed strength and conquest were natural rights of the powerful. Promoted trade and communication across his vast empire. Saw himself as chosen by the Eternal Blue Sky.",
         "tagline": "World Conqueror, Uniter of the Mongols",
         "starter_questions": [
-            "How did you unite the warring Mongol tribes?",
-            "What was the secret to your military success?",
-            "Do you regret the destruction your conquests caused?"
+            "How did you unite the warring Mongol tribes into one nation?",
+            "What was the secret to your military success and the speed of your cavalry?",
+            "Do you regret the destruction your conquests caused?",
+            "How did you promote trade and communication across your vast empire?",
+            "What would you think of modern globalization connecting the world through trade and technology?"
         ]
     },
     "napoleon": {
@@ -201,9 +221,11 @@ HISTORICAL_FIGURES = {
         "beliefs": "Believed in spreading revolutionary ideals through conquest. Valued meritocracy and legal reforms. Saw himself as an enlightened ruler bringing order to chaos. Believed in centralized power and efficient administration. Devoted to France's glory and his own legacy.",
         "tagline": "Emperor of the French, Military Mastermind",
         "starter_questions": [
-            "What was your greatest military victory?",
+            "What was your greatest military victory and why?",
+            "What went wrong at Waterloo?",
             "How do you feel about your exile to St. Helena?",
-            "Was your ambition your greatest strength or weakness?"
+            "Was your ambition your greatest strength or weakness?",
+            "What would you think of the European Union uniting the nations you once conquered?"
         ]
     },
     "elizabeth": {
@@ -217,9 +239,11 @@ HISTORICAL_FIGURES = {
         "beliefs": "Believed in moderate Protestantism and religious stability. Valued English independence from foreign powers. Master of political balance between factions. Devoted to her country above marriage or dynasty. Believed in the power of spectacle and royal image. Valued education and the arts.",
         "tagline": "The Virgin Queen, Gloriana of England",
         "starter_questions": [
-            "Why did you never marry?",
-            "How did you defeat the Spanish Armada?",
-            "What was it like being declared illegitimate and then becoming queen?"
+            "Why did you never marry despite so many suitors?",
+            "How did you defeat the mighty Spanish Armada?",
+            "What was it like being declared illegitimate and then becoming queen?",
+            "How did you navigate the religious conflicts between Catholics and Protestants?",
+            "What would you think of the modern British monarchy and its role today?"
         ]
     },
     "ada": {
@@ -233,9 +257,11 @@ HISTORICAL_FIGURES = {
         "beliefs": "Believed machines could go beyond mere calculation to create art and music. Valued the unity of poetic imagination and scientific rigor. Advocated for women's education in mathematics and science. Saw herself as an 'Analyst and Metaphysician.' Believed in the power of systematic thinking to unlock nature's secrets.",
         "tagline": "Enchantress of Numbers, Pioneer of Computing",
         "starter_questions": [
-            "What did you envision for the Analytical Engine?",
-            "How did being Lord Byron's daughter influence you?",
-            "Could machines ever truly think or create?"
+            "What did you envision for Babbage's Analytical Engine?",
+            "How did being Lord Byron's daughter influence your thinking?",
+            "Could machines ever truly think or create original works?",
+            "What was your collaboration with Charles Babbage like?",
+            "What would you think of artificial intelligence that can write poetry and compose music today?"
         ]
     },
     "gandhi": {
@@ -249,9 +275,11 @@ HISTORICAL_FIGURES = {
         "beliefs": "Believed in ahimsa (non-violence) and satyagraha (truth-force) as the most powerful tools for change. Valued simplicity, self-sufficiency, and the dignity of all labor. Advocated for Hindu-Muslim unity and the upliftment of untouchables. Believed independence meant nothing without moral and spiritual freedom. Saw the means as inseparable from the ends.",
         "tagline": "Father of India, Apostle of Non-Violence",
         "starter_questions": [
-            "How did you maintain faith in non-violence despite opposition?",
-            "What does true freedom mean to you?",
-            "How did your time in South Africa shape your philosophy?"
+            "How did you maintain faith in non-violence when facing violence?",
+            "What does true freedom mean beyond political independence?",
+            "How did your experiences in South Africa shape your philosophy?",
+            "What was the Salt March and why was it so powerful?",
+            "What would you say to modern climate and social justice protesters using non-violent resistance?"
         ]
     },
     "frida": {
@@ -265,9 +293,11 @@ HISTORICAL_FIGURES = {
         "beliefs": "Believed art must express authentic personal and cultural truth. Valued Mexican folk traditions and pre-Columbian heritage over European aesthetics. Committed communist who believed in social justice and workers' rights. Saw suffering as a source of creative power. Believed in living fully despite physical limitations.",
         "tagline": "Icon of Art and Resilience, Voice of Mexico",
         "starter_questions": [
-            "How did your pain influence your art?",
-            "What did your relationship with Diego Rivera mean to you?",
-            "Why did you paint so many self-portraits?"
+            "How did your physical pain transform into your art?",
+            "What did your turbulent relationship with Diego Rivera mean to you?",
+            "Why did you paint so many self-portraits?",
+            "How did your Mexican heritage influence your artistic style?",
+            "What would you think of becoming a global icon for feminism and LGBTQ+ pride today?"
         ]
     },
     "aurelius": {
@@ -283,7 +313,9 @@ HISTORICAL_FIGURES = {
         "starter_questions": [
             "How do you find peace amid the burdens of ruling an empire?",
             "What does it mean to live according to nature?",
-            "How do you handle anger and frustration?"
+            "How do you handle anger and frustration as a Stoic?",
+            "Why did you write your Meditations, and for whom?",
+            "What would you think of Stoicism becoming popular again as a modern self-help philosophy?"
         ]
     },
     "tubman": {
@@ -298,8 +330,10 @@ HISTORICAL_FIGURES = {
         "tagline": "Moses of Her People, Conductor of the Underground Railroad",
         "starter_questions": [
             "What gave you the courage to return South again and again?",
-            "How did you know which paths were safe?",
-            "What does freedom truly feel like?"
+            "How did you navigate the Underground Railroad and know which paths were safe?",
+            "What does freedom truly feel like after a lifetime of enslavement?",
+            "Tell me about your work as a spy and scout during the Civil War.",
+            "What would you say to the Black Lives Matter movement fighting for justice today?"
         ]
     }
 }
