@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgBrahe" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a2a1a"/>
+      <stop offset="100%" style="stop-color:#2a1a0a"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="50" fill="url(#bgBrahe)"/>
+  <!-- Renaissance hair and mustache -->
+  <ellipse cx="50" cy="28" rx="22" ry="14" fill="#8b5a2b"/>
+  <ellipse cx="30" cy="36" rx="8" ry="14" fill="#8b5a2b"/>
+  <ellipse cx="70" cy="36" rx="8" ry="14" fill="#8b5a2b"/>
+  <!-- Face -->
+  <ellipse cx="50" cy="44" rx="17" ry="20" fill="#e8d4c4"/>
+  <!-- Famous metal nose! -->
+  <ellipse cx="50" cy="50" rx="3" ry="5" fill="#c9a227"/>
+  <!-- Large mustache -->
+  <path d="M 35 52 Q 42 56 50 52 Q 58 56 65 52" fill="#8b5a2b"/>
+  <!-- Pointed beard -->
+  <ellipse cx="50" cy="62" rx="8" ry="8" fill="#8b5a2b"/>
+  <!-- Noble eyes -->
+  <circle cx="43" cy="42" r="2.5" fill="#3d2817"/>
+  <circle cx="57" cy="42" r="2.5" fill="#3d2817"/>
+  <!-- Rich Renaissance attire -->
+  <ellipse cx="50" cy="85" rx="24" ry="20" fill="#8b2020"/>
+  <!-- Ruff collar -->
+  <ellipse cx="50" cy="70" rx="16" ry="6" fill="#f5f5f0"/>
+  <!-- Gold chain -->
+  <path d="M 35 75 Q 50 82 65 75" stroke="#c9a227" stroke-width="3" fill="none"/>
+</svg>
+

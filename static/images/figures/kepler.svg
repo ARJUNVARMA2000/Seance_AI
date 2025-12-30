@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgKepler" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2a3a4a"/>
+      <stop offset="100%" style="stop-color:#1a2530"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="50" fill="url(#bgKepler)"/>
+  <!-- Dark beard and hair, Renaissance style -->
+  <ellipse cx="50" cy="28" rx="22" ry="14" fill="#2d1d10"/>
+  <ellipse cx="32" cy="36" rx="8" ry="14" fill="#2d1d10"/>
+  <ellipse cx="68" cy="36" rx="8" ry="14" fill="#2d1d10"/>
+  <!-- Face -->
+  <ellipse cx="50" cy="42" rx="16" ry="18" fill="#e8d4c4"/>
+  <!-- Pointed beard -->
+  <ellipse cx="50" cy="58" rx="10" ry="10" fill="#2d1d10"/>
+  <!-- Mustache -->
+  <ellipse cx="50" cy="50" rx="10" ry="3" fill="#2d1d10"/>
+  <!-- Thoughtful eyes -->
+  <circle cx="43" cy="40" r="2.5" fill="#3d2817"/>
+  <circle cx="57" cy="40" r="2.5" fill="#3d2817"/>
+  <!-- Nose -->
+  <ellipse cx="50" cy="46" rx="2" ry="3" fill="#d4c0b0"/>
+  <!-- Ruff collar -->
+  <ellipse cx="50" cy="85" rx="24" ry="20" fill="#2d2d3d"/>
+  <ellipse cx="50" cy="68" rx="14" ry="5" fill="#f5f5f0"/>
+</svg>
+

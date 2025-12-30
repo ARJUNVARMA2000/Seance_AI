@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgAristotle" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2a3a4a"/>
+      <stop offset="100%" style="stop-color:#1a2530"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="50" fill="url(#bgAristotle)"/>
+  <!-- Curly hair, balding slightly -->
+  <ellipse cx="50" cy="28" rx="20" ry="12" fill="#4b3b2b"/>
+  <ellipse cx="30" cy="34" rx="8" ry="12" fill="#4b3b2b"/>
+  <ellipse cx="70" cy="34" rx="8" ry="12" fill="#4b3b2b"/>
+  <!-- Face -->
+  <ellipse cx="50" cy="44" rx="17" ry="20" fill="#d8c4b4"/>
+  <!-- Short Greek beard -->
+  <ellipse cx="50" cy="58" rx="12" ry="8" fill="#4b3b2b"/>
+  <!-- Penetrating eyes -->
+  <circle cx="43" cy="42" r="2.5" fill="#3d2817"/>
+  <circle cx="57" cy="42" r="2.5" fill="#3d2817"/>
+  <!-- Nose -->
+  <ellipse cx="50" cy="50" rx="2.5" ry="4" fill="#c8b4a4"/>
+  <!-- Thoughtful expression -->
+  <line x1="45" y1="54" x2="55" y2="54" stroke="#8b6b5c" stroke-width="1.5"/>
+  <!-- Greek toga with fold -->
+  <ellipse cx="50" cy="85" rx="24" ry="20" fill="#d0c0b0"/>
+  <path d="M 30 70 L 50 78 L 35 85" stroke="#b0a090" stroke-width="3" fill="none"/>
+</svg>
+

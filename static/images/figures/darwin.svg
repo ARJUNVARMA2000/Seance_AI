@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgDarwin" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2a4a2a"/>
+      <stop offset="100%" style="stop-color:#1a3a1a"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="50" fill="url(#bgDarwin)"/>
+  <!-- Bald head with side hair -->
+  <ellipse cx="50" cy="35" rx="18" ry="18" fill="#e8d4c4"/>
+  <ellipse cx="28" cy="42" rx="8" ry="14" fill="#8b8b8b"/>
+  <ellipse cx="72" cy="42" rx="8" ry="14" fill="#8b8b8b"/>
+  <!-- Face -->
+  <ellipse cx="50" cy="46" rx="17" ry="18" fill="#e8d4c4"/>
+  <!-- Massive iconic beard -->
+  <ellipse cx="50" cy="62" rx="20" ry="16" fill="#8b8b8b"/>
+  <!-- Thoughtful eyes under heavy brows -->
+  <circle cx="43" cy="44" r="2.5" fill="#3d2817"/>
+  <circle cx="57" cy="44" r="2.5" fill="#3d2817"/>
+  <line x1="38" y1="40" x2="48" y2="42" stroke="#5b5b5b" stroke-width="2"/>
+  <line x1="52" y1="42" x2="62" y2="40" stroke="#5b5b5b" stroke-width="2"/>
+  <!-- Nose -->
+  <ellipse cx="50" cy="52" rx="2.5" ry="4" fill="#d4c0b0"/>
+  <!-- Victorian coat -->
+  <ellipse cx="50" cy="85" rx="24" ry="20" fill="#2d2d2d"/>
+</svg>
+

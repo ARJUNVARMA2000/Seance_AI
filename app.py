@@ -674,6 +674,77 @@ def parse_dinner_party_response(response: str, guest_ids: list) -> list:
     return responses
 
 
+@app.route('/api/dinner-party/suggestions', methods=['POST'])
+def api_dinner_party_suggestions():
+    """
+    Generate follow-up question suggestions for dinner party using LLM.
+    Returns quickly with 3 contextual suggestions.
+    """
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"suggestions": ["What do you think?", "Tell us more!", "Do you agree?"]}), 200
+        
+        guest_ids = data.get('guests', [])
+        history = data.get('history', [])
+        last_response = data.get('last_response', '')
+        
+        # Build guest names
+        guest_names = []
+        for guest_id in guest_ids:
+            figure = get_figure(guest_id)
+            if figure:
+                guest_names.append(figure['name'])
+        
+        # Create a prompt for generating suggestions
+        prompt = f"""You are helping a user have a dinner party conversation with these historical figures: {', '.join(guest_names)}.
+
+Based on the last response from the guests:
+"{last_response[:300]}..."
+
+Generate exactly 3 short, engaging follow-up questions the user could ask next. 
+- Keep each under 30 characters
+- Make them provocative and interesting
+- They should spark debate between the guests
+
+Return ONLY a JSON array with 3 strings, nothing else. Example:
+["Question 1?", "Question 2?", "Question 3?"]"""
+
+        messages = [
+            {"role": "system", "content": "You generate short, engaging discussion questions. Return only valid JSON array."},
+            {"role": "user", "content": prompt}
+        ]
+        
+        # Use a fast model for quick suggestions
+        response, is_error = call_llm(messages, None)
+        
+        if is_error:
+            return jsonify({"suggestions": ["What else?", "Do you agree?", "Tell us more!"]}), 200
+        
+        # Parse JSON response
+        try:
+            import re
+            # Find JSON array in response
+            match = re.search(r'\[.*?\]', response, re.DOTALL)
+            if match:
+                import json
+                suggestions = json.loads(match.group())
+                if isinstance(suggestions, list) and len(suggestions) >= 3:
+                    # Truncate long suggestions
+                    suggestions = [s[:35] for s in suggestions[:3]]
+                    return jsonify({"suggestions": suggestions}), 200
+        except:
+            pass
+        
+        # Fallback
+        return jsonify({"suggestions": ["What else?", "Do you agree?", "Tell us more!"]}), 200
+        
+    except Exception as e:
+        app.logger.error(f"Suggestions error: {e}")
+        return jsonify({"suggestions": ["What else?", "Do you agree?", "Tell us more!"]}), 200
+
+
 @app.route('/api/suggestions', methods=['POST'])
 def api_suggestions():
     """

@@ -315,13 +315,13 @@ body.in-conversation .tab-navigation {
 
 /* ===== Views ===== */
 .view {
-    display: none;
+    display: none !important;
     flex: 1;
     animation: fadeIn 0.4s ease;
 }
 
 .view.active {
-    display: flex;
+    display: flex !important;
     flex-direction: column;
 }
 
@@ -1905,7 +1905,7 @@ body::after {
 
 /* ===== Dinner Party Conversation ===== */
 #dinner-party-conversation-view {
-    display: flex;
+    display: none;
     flex-direction: column;
     height: 100vh;
     max-height: 100vh;
@@ -1914,6 +1914,20 @@ body::after {
 
 #dinner-party-conversation-view.active {
     display: flex;
+}
+
+#dinner-party-conversation-view .chat-container {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+#dinner-party-conversation-view .messages {
+    padding: var(--space-sm) var(--space-md);
+}
+
+#dinner-party-conversation-view .chat-form {
+    flex-shrink: 0;
 }
 
 .dinner-party-header {
@@ -1988,10 +2002,12 @@ body::after {
     }
 }
 
-/* Party Suggestions Pills */
+/* Party Suggestion Pills */
 .party-suggestions {
     padding: var(--space-xs) var(--space-md);
     flex-shrink: 0;
+    border-top: 1px solid var(--border-subtle);
+    background: var(--bg-secondary);
 }
 
 .suggestion-pills {
@@ -2002,16 +2018,16 @@ body::after {
 }
 
 .suggestion-pill {
-    padding: var(--space-xs) var(--space-md);
+    padding: var(--space-xs) var(--space-sm);
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
-    border-radius: 20px;
+    border-radius: 16px;
     color: var(--text-secondary);
     font-family: var(--font-ui);
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     cursor: pointer;
     transition: all var(--transition-fast);
-    max-width: 280px;
+    max-width: 200px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2021,46 +2037,37 @@ body::after {
     border-color: var(--accent-gold);
     color: var(--accent-gold);
     background: rgba(212, 175, 55, 0.1);
-    transform: translateY(-1px);
 }
 
-/* Party Chat Container - fit on screen */
-.party-chat-container {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
+.suggestion-pill.loading {
+    opacity: 0.6;
+    pointer-events: none;
 }
 
-#party-chat-form {
-    flex-shrink: 0;
-}
-
-.party-messages {
-    padding: var(--space-sm);
-}
-
-/* Compact party messages */
+/* Compact party messages for screen fit */
 .party-figure-message .message-content {
-    padding: var(--space-sm) var(--space-md);
+    padding: var(--space-xs) var(--space-sm);
 }
 
 .party-figure-message .message-content p {
-    font-size: 0.9rem;
-    line-height: 1.5;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin: 0;
 }
 
 .party-figure-message .message-portrait img {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
 }
 
-/* Compact host message */
-.host-content {
-    padding: var(--space-sm) var(--space-md);
+.host-message .host-content {
+    padding: var(--space-xs) var(--space-sm);
 }
 
 .host-content p {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin: 0;
 }
 
 /* Streaming Content */

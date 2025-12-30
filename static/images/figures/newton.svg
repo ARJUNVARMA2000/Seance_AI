@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgNewton" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a3a2a"/>
+      <stop offset="100%" style="stop-color:#2a2018"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="50" fill="url(#bgNewton)"/>
+  <!-- Long curly wig -->
+  <ellipse cx="50" cy="32" rx="28" ry="20" fill="#5b4b3b"/>
+  <ellipse cx="28" cy="42" rx="10" ry="16" fill="#5b4b3b"/>
+  <ellipse cx="72" cy="42" rx="10" ry="16" fill="#5b4b3b"/>
+  <!-- Face -->
+  <ellipse cx="50" cy="42" rx="16" ry="18" fill="#e8d4c4"/>
+  <!-- Serious eyes -->
+  <circle cx="44" cy="40" r="2.5" fill="#3d2817"/>
+  <circle cx="56" cy="40" r="2.5" fill="#3d2817"/>
+  <!-- Long nose -->
+  <ellipse cx="50" cy="48" rx="2" ry="5" fill="#d4c0b0"/>
+  <!-- Thin lips -->
+  <line x1="45" y1="55" x2="55" y2="55" stroke="#8b6b5c" stroke-width="1.5"/>
+  <!-- Period coat -->
+  <ellipse cx="50" cy="85" rx="24" ry="20" fill="#6b4423"/>
+  <!-- Cravat -->
+  <ellipse cx="50" cy="68" rx="8" ry="4" fill="#f5f5f0"/>
+</svg>
+

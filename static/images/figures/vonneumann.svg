@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgVonneumann" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2d3a4a"/>
+      <stop offset="100%" style="stop-color:#1a2530"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="50" fill="url(#bgVonneumann)"/>
+  <!-- Receding dark hair -->
+  <ellipse cx="50" cy="26" rx="20" ry="10" fill="#2d2017"/>
+  <!-- Bald forehead -->
+  <ellipse cx="50" cy="32" rx="18" ry="8" fill="#e8d4c4"/>
+  <!-- Face -->
+  <ellipse cx="50" cy="44" rx="18" ry="20" fill="#e8d4c4"/>
+  <!-- Eyes with sharp look -->
+  <circle cx="43" cy="42" r="2.5" fill="#3d2817"/>
+  <circle cx="57" cy="42" r="2.5" fill="#3d2817"/>
+  <!-- Nose -->
+  <ellipse cx="50" cy="49" rx="2.5" ry="4" fill="#d4c0b0"/>
+  <!-- Slight smile -->
+  <path d="M 44 55 Q 50 58 56 55" stroke="#8b6b5c" stroke-width="1.5" fill="none"/>
+  <!-- Suit -->
+  <ellipse cx="50" cy="85" rx="24" ry="20" fill="#3d3d4d"/>
+  <polygon points="50,65 44,85 56,85" fill="#ecf0f1"/>
+  <rect x="48" y="65" width="4" height="18" fill="#2c3e50"/>
+</svg>
+

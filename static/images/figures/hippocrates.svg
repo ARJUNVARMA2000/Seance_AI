@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgHippocrates" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3a4a3a"/>
+      <stop offset="100%" style="stop-color:#2a3a2a"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="50" fill="url(#bgHippocrates)"/>
+  <!-- Bald with curly hair on sides -->
+  <ellipse cx="50" cy="35" rx="16" ry="14" fill="#d8c4b4"/>
+  <ellipse cx="28" cy="40" rx="10" ry="14" fill="#8b8b8b"/>
+  <ellipse cx="72" cy="40" rx="10" ry="14" fill="#8b8b8b"/>
+  <!-- Face - wise, elderly -->
+  <ellipse cx="50" cy="46" rx="17" ry="18" fill="#d8c4b4"/>
+  <!-- Neat gray beard -->
+  <ellipse cx="50" cy="62" rx="14" ry="12" fill="#8b8b8b"/>
+  <!-- Calm, observant eyes -->
+  <circle cx="43" cy="44" r="2.5" fill="#4a3728"/>
+  <circle cx="57" cy="44" r="2.5" fill="#4a3728"/>
+  <!-- Nose -->
+  <ellipse cx="50" cy="52" rx="2.5" ry="4" fill="#c8b4a4"/>
+  <!-- Physician's robe -->
+  <ellipse cx="50" cy="85" rx="24" ry="20" fill="#f5f5f0"/>
+  <path d="M 30 72 Q 50 82 70 72" stroke="#e5e5e0" stroke-width="3" fill="none"/>
+  <!-- Staff of Asclepius hint -->
+  <line x1="25" y1="70" x2="25" y2="90" stroke="#8b6b4b" stroke-width="3"/>
+</svg>
+

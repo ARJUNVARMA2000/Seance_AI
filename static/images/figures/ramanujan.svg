@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgRamanujan" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3a2a4a"/>
+      <stop offset="100%" style="stop-color:#2a1a3a"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="50" fill="url(#bgRamanujan)"/>
+  <!-- Dark short hair -->
+  <ellipse cx="50" cy="28" rx="20" ry="12" fill="#1a0a05"/>
+  <!-- Face - South Indian features -->
+  <ellipse cx="50" cy="44" rx="17" ry="20" fill="#8b6b4b"/>
+  <!-- Deep thoughtful eyes -->
+  <circle cx="43" cy="42" r="3" fill="#1a0a05"/>
+  <circle cx="57" cy="42" r="3" fill="#1a0a05"/>
+  <!-- Nose -->
+  <ellipse cx="50" cy="50" rx="2.5" ry="4" fill="#7b5b3b"/>
+  <!-- Gentle expression -->
+  <path d="M 44 56 Q 50 58 56 56" stroke="#5b3b2b" stroke-width="1.5" fill="none"/>
+  <!-- Traditional Indian attire -->
+  <ellipse cx="50" cy="85" rx="24" ry="20" fill="#f5f5f0"/>
+  <!-- South Indian style -->
+  <path d="M 35 72 Q 50 78 65 72" stroke="#d4c4b4" stroke-width="2" fill="none"/>
+</svg>
+

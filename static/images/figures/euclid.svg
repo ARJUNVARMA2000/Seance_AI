@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgEuclid" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3a4a4a"/>
+      <stop offset="100%" style="stop-color:#2a3a3a"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="50" fill="url(#bgEuclid)"/>
+  <!-- Curly Greek hair and beard -->
+  <ellipse cx="50" cy="30" rx="22" ry="14" fill="#5b4b3b"/>
+  <ellipse cx="30" cy="38" rx="8" ry="14" fill="#5b4b3b"/>
+  <ellipse cx="70" cy="38" rx="8" ry="14" fill="#5b4b3b"/>
+  <!-- Face -->
+  <ellipse cx="50" cy="44" rx="16" ry="18" fill="#d8c4b4"/>
+  <!-- Neat philosophical beard -->
+  <ellipse cx="50" cy="60" rx="12" ry="10" fill="#5b4b3b"/>
+  <!-- Scholarly eyes -->
+  <circle cx="43" cy="42" r="2.5" fill="#3d2817"/>
+  <circle cx="57" cy="42" r="2.5" fill="#3d2817"/>
+  <!-- Nose -->
+  <ellipse cx="50" cy="50" rx="2" ry="4" fill="#c8b4a4"/>
+  <!-- Greek toga -->
+  <ellipse cx="50" cy="85" rx="24" ry="20" fill="#e0d0c0"/>
+  <path d="M 32 72 Q 50 80 68 72" stroke="#c0b0a0" stroke-width="3" fill="none"/>
+</svg>
+

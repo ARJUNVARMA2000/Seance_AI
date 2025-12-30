@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgHawking" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1f33"/>
+      <stop offset="100%" style="stop-color:#05101a"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="50" fill="url(#bgHawking)"/>
+  <!-- Wheelchair headrest hint -->
+  <rect x="30" y="60" width="40" height="25" rx="5" fill="#3d3d4d"/>
+  <!-- Thin hair -->
+  <ellipse cx="50" cy="28" rx="18" ry="10" fill="#6b5b4b"/>
+  <!-- Face - thinner due to ALS -->
+  <ellipse cx="50" cy="42" rx="15" ry="18" fill="#e8d4c4"/>
+  <!-- Glasses -->
+  <rect x="38" y="38" width="10" height="8" rx="1" stroke="#2d2d2d" stroke-width="2" fill="none"/>
+  <rect x="52" y="38" width="10" height="8" rx="1" stroke="#2d2d2d" stroke-width="2" fill="none"/>
+  <line x1="48" y1="42" x2="52" y2="42" stroke="#2d2d2d" stroke-width="2"/>
+  <!-- Eyes -->
+  <circle cx="43" cy="42" r="2" fill="#4a3728"/>
+  <circle cx="57" cy="42" r="2" fill="#4a3728"/>
+  <!-- Slight smile -->
+  <path d="M 44 52 Q 50 55 56 52" stroke="#8b6b5c" stroke-width="1" fill="none"/>
+  <!-- Suit -->
+  <ellipse cx="50" cy="85" rx="22" ry="18" fill="#2c3e50"/>
+</svg>
+

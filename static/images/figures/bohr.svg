@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgBohr" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2a3a4a"/>
+      <stop offset="100%" style="stop-color:#1a2530"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="50" fill="url(#bgBohr)"/>
+  <!-- Thinning hair, combed back -->
+  <ellipse cx="50" cy="26" rx="18" ry="10" fill="#4b3b2b"/>
+  <!-- Large forehead -->
+  <ellipse cx="50" cy="32" rx="17" ry="9" fill="#e8d4c4"/>
+  <!-- Face - round -->
+  <ellipse cx="50" cy="46" rx="18" ry="20" fill="#e8d4c4"/>
+  <!-- Thoughtful eyes -->
+  <circle cx="43" cy="44" r="2.5" fill="#4a3728"/>
+  <circle cx="57" cy="44" r="2.5" fill="#4a3728"/>
+  <!-- Larger nose -->
+  <ellipse cx="50" cy="52" rx="3" ry="4" fill="#d4c0b0"/>
+  <!-- Gentle expression -->
+  <path d="M 44 58 Q 50 61 56 58" stroke="#8b6b5c" stroke-width="1.5" fill="none"/>
+  <!-- Suit -->
+  <ellipse cx="50" cy="85" rx="24" ry="20" fill="#3d4d5d"/>
+  <polygon points="50,68 44,85 56,85" fill="#ecf0f1"/>
+  <rect x="48" y="68" width="4" height="15" fill="#5a3a2a"/>
+</svg>
+

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="bgRiemann" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3a3a4a"/>
+      <stop offset="100%" style="stop-color:#2a2a3a"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="50" fill="url(#bgRiemann)"/>
+  <!-- Dark neat hair, 19th century -->
+  <ellipse cx="50" cy="28" rx="20" ry="12" fill="#3d2d1d"/>
+  <!-- Face - thin, scholarly -->
+  <ellipse cx="50" cy="44" rx="16" ry="20" fill="#e8d4c4"/>
+  <!-- Beard -->
+  <ellipse cx="50" cy="58" rx="12" ry="8" fill="#3d2d1d"/>
+  <!-- Thoughtful eyes -->
+  <circle cx="43" cy="42" r="2.5" fill="#3d2817"/>
+  <circle cx="57" cy="42" r="2.5" fill="#3d2817"/>
+  <!-- Nose -->
+  <ellipse cx="50" cy="50" rx="2" ry="4" fill="#d4c0b0"/>
+  <!-- 19th century suit -->
+  <ellipse cx="50" cy="85" rx="24" ry="20" fill="#2d2d3d"/>
+  <polygon points="50,68 44,85 56,85" fill="#ecf0f1"/>
+  <rect x="48" y="68" width="4" height="15" fill="#1a1a2a"/>
+</svg>
+
