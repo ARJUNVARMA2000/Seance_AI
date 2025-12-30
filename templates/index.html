@@ -112,22 +112,8 @@
             <!-- Curated Combos -->
             <div class="curated-combos">
                 <p class="combos-label">Quick Selections:</p>
-                <div class="combo-buttons">
-                    <button class="combo-btn" data-combo="philosophers">
-                        <span>🏛️</span> Philosophers
-                    </button>
-                    <button class="combo-btn" data-combo="scientists">
-                        <span>🔬</span> Scientists
-                    </button>
-                    <button class="combo-btn" data-combo="leaders">
-                        <span>👑</span> Leaders
-                    </button>
-                    <button class="combo-btn" data-combo="artists">
-                        <span>🎨</span> Artists
-                    </button>
-                    <button class="combo-btn" data-combo="revolutionaries">
-                        <span>✊</span> Revolutionaries
-                    </button>
+                <div id="combo-buttons" class="combo-buttons">
+                    <!-- Combo buttons will be dynamically loaded here -->
                 </div>
             </div>
 
@@ -225,6 +211,14 @@
                 </button>
                 <div id="current-figure-info" class="current-figure-info">
                     <!-- Figure info will be loaded here -->
+                </div>
+                <div class="branch-selector-wrapper" style="display: none;">
+                    <select id="branch-selector" title="Select conversation branch">
+                        <option value="main">Main</option>
+                    </select>
+                    <button id="create-branch-btn" class="branch-btn" title="Create branch from last message">
+                        <span>🌿</span>
+                    </button>
                 </div>
                 <div class="model-selector-wrapper">
                     <select id="model-selector" title="Select AI Model">

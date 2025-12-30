@@ -315,13 +315,13 @@ body.in-conversation .tab-navigation {
 
 /* ===== Views ===== */
 .view {
-    display: none;
+    display: none !important;
     flex: 1;
     animation: fadeIn 0.4s ease;
 }
 
 .view.active {
-    display: flex;
+    display: flex !important;
     flex-direction: column;
 }
 
@@ -615,8 +615,11 @@ body.in-conversation .tab-navigation {
 /* ===== Conversation View ===== */
 #conversation-view {
     height: 100%;
-    display: flex;
     flex-direction: column;
+}
+
+#conversation-view.active {
+    display: flex;
 }
 
 /* Hide main header and footer when in conversation */
@@ -702,6 +705,92 @@ body.in-conversation #conversation-view {
 .header-text p {
     font-size: 0.85rem;
     color: var(--text-secondary);
+}
+
+.branch-selector-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+#branch-selector {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: var(--space-xs) var(--space-sm);
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    min-width: 120px;
+}
+
+#branch-selector:hover {
+    border-color: var(--border-accent);
+    background: var(--bg-hover);
+}
+
+#branch-selector:focus {
+    outline: none;
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+}
+
+.branch-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: var(--space-xs) var(--space-sm);
+    color: var(--text-primary);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.branch-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-accent);
+    transform: scale(1.05);
+}
+
+.branch-btn:active {
+    transform: scale(0.95);
+}
+
+.branch-btn-message {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: var(--space-xs);
+    border-radius: 4px;
+    transition: all var(--transition-fast);
+    opacity: 0;
+    margin-left: auto;
+}
+
+.message:hover .branch-btn-message {
+    opacity: 1;
+}
+
+.branch-btn-message:hover {
+    color: var(--accent-gold);
+    background: rgba(212, 175, 55, 0.1);
+}
+
+.message-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: var(--space-xs);
+    gap: var(--space-xs);
 }
 
 .model-selector-wrapper {

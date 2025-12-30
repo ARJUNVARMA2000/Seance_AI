@@ -24,7 +24,10 @@ const state = {
     curatedCombos: {},
     // Save/Resume state
     savedConversations: [],
-    currentConversationId: null
+    currentConversationId: null,
+    // Branching state
+    conversationBranches: {},
+    currentBranchId: 'main'
 };
 
 // DOM Elements
@@ -75,7 +78,11 @@ const elements = {
     savedPanel: document.getElementById('saved-panel'),
     savedOverlay: document.getElementById('saved-overlay'),
     savedList: document.getElementById('saved-list'),
-    closeSavedPanel: document.getElementById('close-saved-panel')
+    closeSavedPanel: document.getElementById('close-saved-panel'),
+    // Branching elements
+    branchSelector: document.getElementById('branch-selector'),
+    branchSelectorWrapper: document.querySelector('.branch-selector-wrapper'),
+    createBranchBtn: document.getElementById('create-branch-btn')
 };
 
 // Initialize app
@@ -270,12 +277,15 @@ async function selectFigure(figure) {
     state.currentFigure = figure;
     state.conversationHistory = [];
     state.currentConversationId = null;
+    state.currentBranchId = 'main';
+    state.conversationBranches = {};
     
     // Update UI
     renderCurrentFigure();
     renderStarterQuestions();
     clearMessages();
     showConversationView();
+    renderBranchSelector();
     
     // Add welcome message (no suggestions - starter questions are shown separately)
     addMessage('figure', `*The spirit of ${figure.name} materializes before you*\n\nGreetings, traveler through time. I am ${figure.name}, ${figure.title}. What wisdom do you seek from my era?`, false);
@@ -316,9 +326,18 @@ function renderStarterQuestions() {
 }
 
 // Add a message to the chat
-function addMessage(role, content, showSuggestions = false) {
+function addMessage(role, content, showSuggestions = false, messageIndex = null) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${role}-message`;
+    
+    // Store message index for branching
+    if (messageIndex !== null) {
+        messageDiv.dataset.messageIndex = messageIndex;
+    } else {
+        // Auto-assign index based on current branch history length
+        const currentHistory = getCurrentHistory();
+        messageDiv.dataset.messageIndex = currentHistory.length;
+    }
     
     if (role === 'figure') {
         const figure = state.currentFigure;
@@ -352,6 +371,34 @@ function addMessage(role, content, showSuggestions = false) {
                 <p>${escapeHtml(content)}</p>
             </div>
         `;
+    }
+    
+    // Add branch button to message (only in seance mode, not on welcome message, and only if conversation has started)
+    const messageIndex = parseInt(messageDiv.dataset.messageIndex);
+    if (state.currentConversationId && 
+        !elements.dinnerPartyConversationView?.classList.contains('active') &&
+        messageIndex > 0) { // Don't show on first message (welcome message)
+        const branchBtn = document.createElement('button');
+        branchBtn.className = 'branch-btn-message';
+        branchBtn.title = 'Create branch from here';
+        branchBtn.innerHTML = '🌿';
+        branchBtn.setAttribute('aria-label', 'Create branch from this message');
+        branchBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            promptBranchName(messageIndex);
+        });
+        
+        // Add to message content
+        const messageContent = messageDiv.querySelector('.message-content');
+        if (messageContent) {
+            let branchBtnContainer = messageContent.querySelector('.message-actions');
+            if (!branchBtnContainer) {
+                branchBtnContainer = document.createElement('div');
+                branchBtnContainer.className = 'message-actions';
+                messageContent.appendChild(branchBtnContainer);
+            }
+            branchBtnContainer.appendChild(branchBtn);
+        }
     }
     
     elements.messages.appendChild(messageDiv);
@@ -402,8 +449,18 @@ async function sendMessage() {
     elements.messageInput.value = '';
     updateSendButtonState();
     
-    // Add to history
-    state.conversationHistory.push({ role: 'user', content: message });
+    // Add to history (branch-aware)
+    const currentHistory = getCurrentHistory();
+    currentHistory.push({ role: 'user', content: message });
+    setCurrentHistory(currentHistory);
+    
+    // Initialize branches if this is a new conversation
+    if (!state.currentConversationId) {
+        const id = generateConversationId();
+        state.currentConversationId = id;
+        initializeBranches(id);
+        renderBranchSelector();
+    }
     
     // Show loading state
     state.isLoading = true;
@@ -412,7 +469,7 @@ async function sendMessage() {
     const requestBody = {
         figure_id: state.currentFigure.id,
         message: message,
-        history: state.conversationHistory.slice(-20),
+        history: currentHistory.slice(-20),
         model: state.selectedModel
     };
     
@@ -466,6 +523,7 @@ async function tryStreamingResponse(requestBody) {
         const messageElement = createStreamingMessage();
         let fullResponse = '';
         let hasReceivedContent = false;
+        let suggestionsFetched = false;  // Track if we've started fetching suggestions
         
         // Initialize smooth streaming state
         state.streamBuffer = '';
@@ -509,6 +567,30 @@ async function tryStreamingResponse(requestBody) {
                             fullResponse += data.content;
                             // Use smooth buffered update instead of direct DOM manipulation
                             scheduleStreamUpdate(fullResponse);
+                            
+                            // Start fetching suggestions early (after ~200 chars) for faster loading
+                            if (!suggestionsFetched && fullResponse.length > 200) {
+                                suggestionsFetched = true;
+                                // Create suggestions container early and show fallback suggestions
+                                const messageContent = messageElement.querySelector('.message-content');
+                                if (messageContent) {
+                                    let suggestionsContainer = messageElement.querySelector('.message-suggestions');
+                                    if (!suggestionsContainer) {
+                                        suggestionsContainer = document.createElement('div');
+                                        suggestionsContainer.className = 'message-suggestions';
+                                        suggestionsContainer.dataset.messageId = Date.now();
+                                        messageContent.appendChild(suggestionsContainer);
+                                    }
+                                    // Show immediate fallback suggestions while AI ones load
+                                    displaySuggestions([
+                                        "Tell me more about that.",
+                                        "What was your perspective?",
+                                        "How did that affect you?"
+                                    ], messageElement);
+                                    // Fetch AI-generated suggestions in background (will replace fallbacks)
+                                    fetchSuggestions(fullResponse, messageElement);
+                                }
+                            }
                         }
                         
                         if (data.done) {
@@ -528,7 +610,9 @@ async function tryStreamingResponse(requestBody) {
             cancelStreamAnimation();
             flushStreamBuffer(fullResponse);
             finalizeStreamingMessage(messageElement, fullResponse);
-            state.conversationHistory.push({ role: 'assistant', content: fullResponse });
+            const currentHistory = getCurrentHistory();
+            currentHistory.push({ role: 'assistant', content: fullResponse });
+            setCurrentHistory(currentHistory);
             autoSaveConversation();
             return true;
         }
@@ -610,9 +694,12 @@ async function fallbackToRegularChat(requestBody) {
     const data = await response.json();
     
     if (response.ok && data.response) {
-        // Show suggestions for all AI responses
+        // Show suggestions for all AI responses in normal mode (welcome message is handled separately in selectFigure)
+        // All messages that go through this function are non-welcome responses, so always show suggestions
         addMessage('figure', data.response, true);
-        state.conversationHistory.push({ role: 'assistant', content: data.response });
+        const currentHistory = getCurrentHistory();
+        currentHistory.push({ role: 'assistant', content: data.response });
+        setCurrentHistory(currentHistory);
         autoSaveConversation();
     } else {
         // Handle error response
@@ -729,13 +816,23 @@ function finalizeStreamingMessage(messageElement, content) {
         textElement.classList.remove('streaming-text');
     }
     
-    // Show suggestions for all AI responses (welcome message is handled separately)
+    // Show suggestions for all AI responses in normal mode (welcome message is handled separately in selectFigure)
+    // All messages that go through this function are non-welcome responses, so always show suggestions
+    // Note: Suggestions may have already been fetched during streaming for faster loading
     if (messageContent) {
-        const suggestionsContainer = document.createElement('div');
-        suggestionsContainer.className = 'message-suggestions';
-        suggestionsContainer.dataset.messageId = Date.now();
-        messageContent.appendChild(suggestionsContainer);
-        fetchSuggestions(content, messageElement);
+        // Check if suggestions container already exists (may have been created during streaming)
+        let suggestionsContainer = messageElement.querySelector('.message-suggestions');
+        if (!suggestionsContainer) {
+            suggestionsContainer = document.createElement('div');
+            suggestionsContainer.className = 'message-suggestions';
+            suggestionsContainer.dataset.messageId = Date.now();
+            messageContent.appendChild(suggestionsContainer);
+            // Only fetch if not already fetched during streaming
+            fetchSuggestions(content, messageElement);
+        } else {
+            // Update suggestions with final content if they were fetched early
+            fetchSuggestions(content, messageElement);
+        }
     }
 }
 
@@ -763,7 +860,9 @@ function showConversationView() {
     // Check if user prefers reduced motion
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     
+    // Hide selection view completely
     elements.selectionView.classList.remove('active');
+    elements.selectionView.style.display = 'none';
     
     if (!prefersReducedMotion) {
         // Add summoning class for enhanced animation
@@ -778,7 +877,9 @@ function showConversationView() {
         }, 1000);
     }
     
+    // Show conversation view
     elements.conversationView.classList.add('active');
+    elements.conversationView.style.display = 'flex';
     document.body.classList.add('in-conversation');
 }
 
@@ -795,25 +896,49 @@ function createSummoningEffect() {
 }
 
 function showSelectionView() {
+    // Ensure conversation view is completely hidden
     elements.conversationView.classList.remove('active');
+    elements.conversationView.classList.remove('summoning');
+    elements.conversationView.style.display = 'none';
+    
+    // Show selection view
     elements.selectionView.classList.add('active');
+    elements.selectionView.style.display = 'flex';
+    
     document.body.classList.remove('in-conversation');
     state.currentFigure = null;
     state.conversationHistory = [];
+    state.currentConversationId = null;
+    state.currentBranchId = 'main';
+    state.conversationBranches = {};
+    renderBranchSelector();
     showStarterQuestions();
 }
 
 // Copy conversation to clipboard
 function copyConversation() {
-    if (!state.currentFigure || state.conversationHistory.length === 0) {
+    if (!state.currentFigure) {
         showToast('No conversation to copy');
         return;
     }
     
-    let text = `Conversation with ${state.currentFigure.name}\n`;
-    text += `${'='.repeat(40)}\n\n`;
+    const currentHistory = getCurrentHistory();
+    if (currentHistory.length === 0) {
+        showToast('No conversation to copy');
+        return;
+    }
     
-    state.conversationHistory.forEach(msg => {
+    const branchName = state.currentBranchId !== 'main' && state.conversationBranches[state.currentConversationId] 
+        ? state.conversationBranches[state.currentConversationId][state.currentBranchId]?.name 
+        : null;
+    
+    let text = `Conversation with ${state.currentFigure.name}`;
+    if (branchName) {
+        text += ` (${branchName})`;
+    }
+    text += `\n${'='.repeat(40)}\n\n`;
+    
+    currentHistory.forEach(msg => {
         const author = msg.role === 'user' ? 'You' : state.currentFigure.name;
         text += `${author}:\n${msg.content}\n\n`;
     });
@@ -829,7 +954,13 @@ function copyConversation() {
 
 // Download conversation as a file
 function downloadConversation() {
-    if (!state.currentFigure || state.conversationHistory.length === 0) {
+    if (!state.currentFigure) {
+        showToast('No conversation to download');
+        return;
+    }
+    
+    const currentHistory = getCurrentHistory();
+    if (currentHistory.length === 0) {
         showToast('No conversation to download');
         return;
     }
@@ -840,12 +971,20 @@ function downloadConversation() {
         day: 'numeric' 
     });
     
-    let content = `# Conversation with ${state.currentFigure.name}\n`;
+    const branchName = state.currentBranchId !== 'main' && state.conversationBranches[state.currentConversationId] 
+        ? state.conversationBranches[state.currentConversationId][state.currentBranchId]?.name 
+        : null;
+    
+    let content = `# Conversation with ${state.currentFigure.name}`;
+    if (branchName) {
+        content += ` (${branchName})`;
+    }
+    content += `\n`;
     content += `**${state.currentFigure.title}** | ${state.currentFigure.dates}\n`;
     content += `*Date: ${date}*\n\n`;
     content += `---\n\n`;
     
-    state.conversationHistory.forEach(msg => {
+    currentHistory.forEach(msg => {
         const author = msg.role === 'user' ? '**You**' : `**${state.currentFigure.name}**`;
         content += `${author}:\n\n${msg.content}\n\n---\n\n`;
     });
@@ -857,7 +996,8 @@ function downloadConversation() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `seance-${state.currentFigure.id}-${new Date().toISOString().split('T')[0]}.md`;
+    const branchSuffix = branchName ? `-${branchName.replace(/[^a-z0-9]/gi, '-').toLowerCase()}` : '';
+    a.download = `seance-${state.currentFigure.id}${branchSuffix}-${new Date().toISOString().split('T')[0]}.md`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -915,14 +1055,58 @@ function switchTab(tabName) {
 
 // ===== CURATED COMBOS =====
 
+// Emoji mapping for combo types
+const COMBO_ICONS = {
+    "philosophers": "🏛️",
+    "scientists": "🔬",
+    "leaders": "👑",
+    "artists": "🎨",
+    "revolutionaries": "✊",
+    "mathematicians": "📐",
+    "physicists": "⚛️",
+    "computer-scientists": "💻",
+    "astronomers": "🔭",
+    "biologists": "🧬",
+    "ancient-scholars": "📜",
+    "quantum-pioneers": "⚡",
+    "mathematical-geniuses": "∞"
+};
+
 async function loadCuratedCombos() {
     try {
         const response = await fetch('/api/dinner-party/combos');
         const data = await response.json();
         state.curatedCombos = data.combos;
+        renderComboButtons();
     } catch (error) {
         console.error('Failed to load curated combos:', error);
     }
+}
+
+function renderComboButtons() {
+    const comboButtonsContainer = document.getElementById('combo-buttons');
+    if (!comboButtonsContainer || !state.curatedCombos) return;
+    
+    comboButtonsContainer.innerHTML = '';
+    
+    // Sort combos: original ones first, then new ones
+    const originalCombos = ['philosophers', 'scientists', 'leaders', 'artists', 'revolutionaries'];
+    const sortedComboIds = [
+        ...originalCombos.filter(id => state.curatedCombos[id]),
+        ...Object.keys(state.curatedCombos).filter(id => !originalCombos.includes(id))
+    ];
+    
+    sortedComboIds.forEach(comboId => {
+        const combo = state.curatedCombos[comboId];
+        if (!combo) return;
+        
+        const button = document.createElement('button');
+        button.className = 'combo-btn';
+        button.dataset.combo = comboId;
+        button.innerHTML = `<span>${COMBO_ICONS[comboId] || '✨'}</span> ${combo.name}`;
+        button.addEventListener('click', () => selectCombo(comboId));
+        comboButtonsContainer.appendChild(button);
+    });
 }
 
 function selectCombo(comboId) {
@@ -1631,7 +1815,7 @@ function saveConversationsToStorage() {
 
 function autoSaveConversation() {
     const isParty = elements.dinnerPartyConversationView?.classList.contains('active');
-    const history = isParty ? state.partyConversationHistory : state.conversationHistory;
+    const history = isParty ? state.partyConversationHistory : getCurrentHistory();
     
     if (history.length === 0) return;
     
@@ -1641,13 +1825,25 @@ function autoSaveConversation() {
         // Update existing conversation
         const index = state.savedConversations.findIndex(c => c.id === state.currentConversationId);
         if (index > -1) {
-            state.savedConversations[index].history = [...history];
+            // Save current branch history
+            const currentHistory = getCurrentHistory();
+            state.savedConversations[index].history = [...currentHistory];
+            
+            // Save branches if they exist
+            if (state.conversationBranches[state.currentConversationId]) {
+                state.savedConversations[index].branches = JSON.parse(JSON.stringify(state.conversationBranches[state.currentConversationId]));
+                state.savedConversations[index].currentBranchId = state.currentBranchId;
+            }
+            
             state.savedConversations[index].updated_at = now;
         }
     } else {
         // Create new conversation
         const id = generateConversationId();
         state.currentConversationId = id;
+        
+        // Initialize branches
+        initializeBranches(id);
         
         // Generate title from first user message
         const firstUserMsg = history.find(m => m.role === 'user');
@@ -1665,6 +1861,12 @@ function autoSaveConversation() {
             updated_at: now,
             title: title
         };
+        
+        // Add branches if they exist
+        if (state.conversationBranches[id]) {
+            conversation.branches = JSON.parse(JSON.stringify(state.conversationBranches[id]));
+            conversation.currentBranchId = state.currentBranchId;
+        }
         
         state.savedConversations.unshift(conversation);
         
@@ -1730,20 +1932,314 @@ function resumeConversation(id) {
         }
         
         state.currentFigure = figure;
-        state.conversationHistory = [...conversation.history];
+        state.currentConversationId = id;
+        
+        // Restore branches if they exist
+        if (conversation.branches) {
+            state.conversationBranches[id] = JSON.parse(JSON.stringify(conversation.branches));
+            state.currentBranchId = conversation.currentBranchId || 'main';
+        } else {
+            // Backward compatibility: create main branch from old history
+            state.conversationBranches[id] = {
+                main: {
+                    id: 'main',
+                    name: 'Main',
+                    parentId: null,
+                    parentMessageId: null,
+                    history: [...conversation.history],
+                    created_at: conversation.created_at || new Date().toISOString()
+                }
+            };
+            state.currentBranchId = 'main';
+        }
+        
+        // Get current branch history
+        const branches = state.conversationBranches[id];
+        const currentBranch = branches[state.currentBranchId] || branches.main;
+        state.conversationHistory = [...currentBranch.history];
         
         renderCurrentFigure();
         clearMessages();
         hideStarterQuestions();
+        renderBranchSelector();
         
         // Replay messages
-        conversation.history.forEach(msg => {
-            addMessage(msg.role === 'user' ? 'user' : 'figure', msg.content, false);
+        currentBranch.history.forEach((msg, index) => {
+            addMessage(msg.role === 'user' ? 'user' : 'figure', msg.content, false, index);
         });
         
         switchTab('seance');
         showConversationView();
     }
+}
+
+// ===== CONVERSATION BRANCHING =====
+
+// Get current conversation history (from current branch)
+function getCurrentHistory() {
+    const isParty = elements.dinnerPartyConversationView?.classList.contains('active');
+    if (isParty) {
+        return state.partyConversationHistory;
+    }
+    
+    // For seance, check if we have branches
+    if (state.currentConversationId && state.conversationBranches[state.currentConversationId]) {
+        const branches = state.conversationBranches[state.currentConversationId];
+        const currentBranch = branches[state.currentBranchId] || branches.main;
+        if (currentBranch && currentBranch.history) {
+            return currentBranch.history;
+        }
+    }
+    
+    return state.conversationHistory;
+}
+
+// Set current conversation history (to current branch)
+function setCurrentHistory(history) {
+    const isParty = elements.dinnerPartyConversationView?.classList.contains('active');
+    if (isParty) {
+        state.partyConversationHistory = history;
+        return;
+    }
+    
+    // For seance, update branch if it exists
+    if (state.currentConversationId && state.conversationBranches[state.currentConversationId]) {
+        const branches = state.conversationBranches[state.currentConversationId];
+        if (branches[state.currentBranchId]) {
+            branches[state.currentBranchId].history = history;
+        }
+    }
+    
+    state.conversationHistory = history;
+}
+
+// Initialize branches for a conversation
+function initializeBranches(conversationId) {
+    if (!state.conversationBranches[conversationId]) {
+        const currentHistory = getCurrentHistory();
+        state.conversationBranches[conversationId] = {
+            main: {
+                id: 'main',
+                name: 'Main',
+                parentId: null,
+                parentMessageId: null,
+                history: [...currentHistory],
+                created_at: new Date().toISOString()
+            }
+        };
+        state.currentBranchId = 'main';
+    }
+}
+
+// Generate branch ID
+function generateBranchId() {
+    return 'branch-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+}
+
+// Create a new branch from a specific message
+function createBranch(messageIndex, branchName = null) {
+    if (!state.currentConversationId) {
+        showToast('Please start a conversation first');
+        return;
+    }
+    
+    const isParty = elements.dinnerPartyConversationView?.classList.contains('active');
+    if (isParty) {
+        showToast('Branching not yet supported for dinner parties');
+        return;
+    }
+    
+    // Initialize branches if needed
+    initializeBranches(state.currentConversationId);
+    
+    const branches = state.conversationBranches[state.currentConversationId];
+    const currentBranch = branches[state.currentBranchId];
+    
+    if (!currentBranch) {
+        showToast('Unable to create branch');
+        return;
+    }
+    
+    // Check branch limit
+    const branchCount = Object.keys(branches).length;
+    if (branchCount >= 10) {
+        showToast('Maximum 10 branches per conversation');
+        return;
+    }
+    
+    // Get history up to the message index
+    const history = currentBranch.history;
+    if (messageIndex < 0 || messageIndex >= history.length) {
+        showToast('Invalid message position');
+        return;
+    }
+    
+    // Clone history up to (and including) the selected message
+    // messageIndex is 0-based, so slice(0, messageIndex + 1) includes the message at that index
+    const branchHistory = history.slice(0, messageIndex + 1);
+    
+    // Generate branch name if not provided
+    if (!branchName) {
+        const message = branchHistory[branchHistory.length - 1];
+        const preview = message.content.substring(0, 30);
+        branchName = `Branch from "${preview}${preview.length < message.content.length ? '...' : ''}"`;
+    }
+    
+    // Create new branch
+    const branchId = generateBranchId();
+    const newBranch = {
+        id: branchId,
+        name: branchName,
+        parentId: state.currentBranchId,
+        parentMessageId: messageIndex,
+        history: [...branchHistory],
+        created_at: new Date().toISOString()
+    };
+    
+    branches[branchId] = newBranch;
+    
+    // Switch to new branch
+    switchBranch(branchId);
+    
+    // Update UI
+    renderBranchSelector();
+    
+    showToast(`Created branch: ${branchName}`);
+}
+
+// Switch to a different branch
+function switchBranch(branchId) {
+    if (!state.currentConversationId) return;
+    
+    const branches = state.conversationBranches[state.currentConversationId];
+    if (!branches || !branches[branchId]) {
+        showToast('Branch not found');
+        return;
+    }
+    
+    state.currentBranchId = branchId;
+    const branch = branches[branchId];
+    
+    // Update conversation history
+    state.conversationHistory = [...branch.history];
+    
+    // Re-render messages
+    clearMessages();
+    hideStarterQuestions();
+    
+    // Replay messages
+    branch.history.forEach((msg, index) => {
+        if (msg.role === 'user') {
+            addMessage('user', msg.content, false, index);
+        } else {
+            addMessage('figure', msg.content, false, index);
+        }
+    });
+    
+    // Update branch selector
+    renderBranchSelector();
+    
+    showToast(`Switched to: ${branch.name}`);
+}
+
+// Delete a branch
+function deleteBranch(branchId) {
+    if (!state.currentConversationId) return;
+    
+    const branches = state.conversationBranches[state.currentConversationId];
+    if (!branches || !branches[branchId]) {
+        return;
+    }
+    
+    // Cannot delete main branch
+    if (branchId === 'main') {
+        showToast('Cannot delete main branch');
+        return;
+    }
+    
+    // If deleting current branch, switch to main
+    if (branchId === state.currentBranchId) {
+        switchBranch('main');
+    }
+    
+    // Remove branch
+    delete branches[branchId];
+    
+    // Update UI
+    renderBranchSelector();
+    
+    showToast('Branch deleted');
+}
+
+// Render branch selector dropdown
+function renderBranchSelector() {
+    if (!elements.branchSelector) return;
+    
+    const wrapper = elements.branchSelectorWrapper || elements.branchSelector.parentElement;
+    
+    if (!state.currentConversationId || elements.dinnerPartyConversationView?.classList.contains('active')) {
+        elements.branchSelector.innerHTML = '<option value="main">Main</option>';
+        if (wrapper) {
+            wrapper.style.display = 'none';
+        }
+        return;
+    }
+    
+    const branches = state.conversationBranches[state.currentConversationId];
+    if (!branches || Object.keys(branches).length <= 1) {
+        // Only show if there are multiple branches
+        elements.branchSelector.innerHTML = '<option value="main">Main</option>';
+        if (wrapper) {
+            wrapper.style.display = 'none';
+        }
+        return;
+    }
+    
+    // Show branch selector
+    if (wrapper) {
+        wrapper.style.display = 'flex';
+    }
+    
+    // Build options
+    elements.branchSelector.innerHTML = Object.values(branches)
+        .sort((a, b) => {
+            // Main branch first, then by creation time
+            if (a.id === 'main') return -1;
+            if (b.id === 'main') return 1;
+            return new Date(a.created_at) - new Date(b.created_at);
+        })
+        .map(branch => {
+            const isSelected = branch.id === state.currentBranchId;
+            const branchLabel = branch.id === 'main' ? 'Main' : branch.name;
+            return `<option value="${branch.id}" ${isSelected ? 'selected' : ''}>${escapeHtml(branchLabel)}</option>`;
+        })
+        .join('');
+}
+
+// Get message index from message element
+function getMessageIndex(messageElement) {
+    const messages = Array.from(elements.messages.children);
+    return messages.indexOf(messageElement);
+}
+
+// Prompt user for branch name
+function promptBranchName(messageIndex) {
+    const currentHistory = getCurrentHistory();
+    if (messageIndex < 0 || messageIndex >= currentHistory.length) {
+        showToast('Invalid message position');
+        return;
+    }
+    
+    const message = currentHistory[messageIndex];
+    const preview = message.content.substring(0, 30);
+    const defaultName = `Branch from "${preview}${preview.length < message.content.length ? '...' : ''}"`;
+    
+    const branchName = prompt('Enter a name for this branch (or leave empty for default):', defaultName);
+    if (branchName === null) {
+        return; // User cancelled
+    }
+    
+    createBranch(messageIndex, branchName || defaultName);
 }
 
 // ===== SAVED CONVERSATIONS PANEL =====
@@ -1889,10 +2385,8 @@ function setupEventListeners() {
         });
     }
     
-    // Curated combos
-    document.querySelectorAll('.combo-btn').forEach(btn => {
-        btn.addEventListener('click', () => selectCombo(btn.dataset.combo));
-    });
+    // Curated combos - event listeners are now attached in renderComboButtons()
+    // No need to set up here since buttons are created dynamically
     
     // Guest selection
     if (elements.clearGuestsBtn) {
@@ -1938,6 +2432,29 @@ function setupEventListeners() {
     }
     if (elements.savedOverlay) {
         elements.savedOverlay.addEventListener('click', closeSavedPanel);
+    }
+    
+    // Branch selector
+    if (elements.branchSelector) {
+        elements.branchSelector.addEventListener('change', (e) => {
+            const branchId = e.target.value;
+            if (branchId && branchId !== state.currentBranchId) {
+                switchBranch(branchId);
+            }
+        });
+    }
+    
+    // Create branch button (from last message)
+    if (elements.createBranchBtn) {
+        elements.createBranchBtn.addEventListener('click', () => {
+            const currentHistory = getCurrentHistory();
+            if (currentHistory.length === 0) {
+                showToast('No messages to branch from');
+                return;
+            }
+            const lastIndex = currentHistory.length - 1;
+            promptBranchName(lastIndex);
+        });
     }
     
     // Keyboard shortcuts
