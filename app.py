@@ -131,6 +131,45 @@ def _make_api_request(messages: list, model: str, timeout: int = 30, stream: boo
         }
 
 
+def call_llm_suggestions(messages: list, model: str = None) -> Tuple[str, bool]:
+    """
+    Fast version of call_llm optimized for suggestions.
+    """
+    if not OPENROUTER_API_KEY:
+        return ("", True)
+    
+    selected_model = model or "meta-llama/llama-3.3-70b-instruct:free"
+    
+    try:
+        response = requests.post(
+            OPENROUTER_URL,
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": request.host_url if request else "http://localhost",
+                "X-Title": "SeanceAI - Talk to History"
+            },
+            json={
+                "model": selected_model,
+                "messages": messages,
+                "max_tokens": 150,
+                "temperature": 0.7,
+            },
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            if "choices" in data and len(data["choices"]) > 0:
+                content = data["choices"][0]["message"]["content"]
+                return (content, False)
+        
+        return ("", True)
+    except Exception as e:
+        app.logger.warning(f"Suggestions API error: {e}")
+        return ("", True)
+
+
 def call_llm(messages: list, model: str = None) -> Tuple[str, bool]:
     """
     Call the OpenRouter API with the given messages.
@@ -773,25 +812,21 @@ def api_suggestions():
         if last_response:
             conversation_context += f"{figure['name']}: {last_response}\n\n"
         
-        suggestion_prompt = f"""Based on this conversation with {figure['name']}, generate 3-4 engaging follow-up questions that a user might ask to continue the conversation naturally. The questions should:
-1. Be contextually relevant to what was just discussed
-2. Be engaging and encourage deeper conversation
-3. Be phrased as if the user is speaking directly to {figure['name']}
-4. Vary in depth and topic
-5. Be concise (one sentence each)
+        recent_context = conversation_context[-500:] if len(conversation_context) > 500 else conversation_context
+        suggestion_prompt = f"""Generate 2-3 short follow-up questions (under 50 chars each) for a conversation with {figure['name']}.
 
-Conversation so far:
-{conversation_context}
+Last exchange:
+{recent_context}
 
-Generate ONLY the questions, one per line, without numbering or bullets. Return them as a simple list."""
+Return ONLY the questions, one per line, no numbering."""
 
         messages = [
-            {"role": "system", "content": "You are a helpful assistant that generates engaging conversation questions. Return only the questions, one per line."},
+            {"role": "system", "content": "Generate 2-3 short conversation questions. Return only questions, one per line."},
             {"role": "user", "content": suggestion_prompt}
         ]
         
-        # Use a fast model for suggestions
-        response_text, is_error = call_llm(messages, model or DEFAULT_MODEL)
+        fast_model = "meta-llama/llama-3.3-70b-instruct:free"
+        response_text, is_error = call_llm_suggestions(messages, fast_model)
         
         # If there's an error, use fallback suggestions
         if is_error:
@@ -806,16 +841,14 @@ Generate ONLY the questions, one per line, without numbering or bullets. Return 
             if line and len(line) > 10:  # Filter out very short lines
                 suggestions.append(line)
         
-        # Limit to 4 suggestions
-        suggestions = suggestions[:4]
+        suggestions = suggestions[:3]
         
         # If we didn't get good suggestions, provide some generic ones
         if not suggestions:
             suggestions = [
-                f"Tell me more about that.",
-                f"What was your perspective on that?",
-                f"How did that affect you?",
-                f"What would you like to discuss next?"
+                "Tell me more about that.",
+                "What was your perspective on that?",
+                "How did that affect you?"
             ]
         
         return jsonify({"suggestions": suggestions})
@@ -829,8 +862,7 @@ Generate ONLY the questions, one per line, without numbering or bullets. Return 
             "suggestions": [
                 "Tell me more about that.",
                 "What was your perspective on that?",
-                "How did that affect you?",
-                "What would you like to discuss next?"
+                "How did that affect you?"
             ]
         })
 
