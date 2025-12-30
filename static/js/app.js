@@ -374,10 +374,10 @@ function addMessage(role, content, showSuggestions = false, messageIndex = null)
     }
     
     // Add branch button to message (only in seance mode, not on welcome message, and only if conversation has started)
-    const messageIndex = parseInt(messageDiv.dataset.messageIndex);
+    const msgIndex = parseInt(messageDiv.dataset.messageIndex);
     if (state.currentConversationId && 
         !elements.dinnerPartyConversationView?.classList.contains('active') &&
-        messageIndex > 0) { // Don't show on first message (welcome message)
+        msgIndex > 0) { // Don't show on first message (welcome message)
         const branchBtn = document.createElement('button');
         branchBtn.className = 'branch-btn-message';
         branchBtn.title = 'Create branch from here';
@@ -385,7 +385,7 @@ function addMessage(role, content, showSuggestions = false, messageIndex = null)
         branchBtn.setAttribute('aria-label', 'Create branch from this message');
         branchBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            promptBranchName(messageIndex);
+            promptBranchName(msgIndex);
         });
         
         // Add to message content
