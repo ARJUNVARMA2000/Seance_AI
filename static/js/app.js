@@ -1045,143 +1045,12 @@ function startDinnerParty() {
     // Add welcome message
     addPartyMessage('host', getPartyWelcomeMessage());
     
-    // Show starter suggestions immediately
-    showStarterSuggestions();
+    // Show welcome suggestions immediately
+    showWelcomeSuggestions();
     
     if (elements.partyMessageInput) {
         elements.partyMessageInput.focus();
     }
-}
-
-// ===== SUGGESTION PILLS =====
-
-function getStarterSuggestions() {
-    const guestIds = state.selectedGuests;
-    const suggestions = [];
-    
-    // Category-specific starters based on guests
-    const hasScientists = guestIds.some(id => ['einstein', 'curie', 'tesla', 'ada'].includes(id));
-    const hasLeaders = guestIds.some(id => ['caesar', 'cleopatra', 'napoleon', 'elizabeth', 'genghis', 'lincoln'].includes(id));
-    const hasPhilosophers = guestIds.some(id => ['socrates', 'aurelius', 'gandhi'].includes(id));
-    const hasArtists = guestIds.some(id => ['davinci', 'shakespeare', 'frida'].includes(id));
-    
-    if (hasScientists) suggestions.push("What discovery changed humanity most?");
-    if (hasLeaders) suggestions.push("What defines true leadership?");
-    if (hasPhilosophers) suggestions.push("What is the meaning of a good life?");
-    if (hasArtists) suggestions.push("How does art shape civilization?");
-    
-    // Universal starters
-    const universal = [
-        "What would you change about your era?",
-        "What advice for today's world?",
-        "What's your greatest regret?"
-    ];
-    
-    // Fill to 3 suggestions
-    for (const q of universal) {
-        if (suggestions.length >= 3) break;
-        if (!suggestions.includes(q)) suggestions.push(q);
-    }
-    
-    return suggestions.slice(0, 3);
-}
-
-function showStarterSuggestions() {
-    const suggestions = getStarterSuggestions();
-    renderSuggestionPills(suggestions);
-}
-
-function renderSuggestionPills(suggestions, loading = false) {
-    if (!elements.partySuggestionPills) return;
-    
-    elements.partySuggestionPills.innerHTML = suggestions.map(s => 
-        `<button class="suggestion-pill${loading ? ' loading' : ''}" type="button">${escapeHtml(s)}</button>`
-    ).join('');
-    
-    if (!loading) {
-        elements.partySuggestionPills.querySelectorAll('.suggestion-pill').forEach(btn => {
-            btn.addEventListener('click', () => {
-                if (elements.partyMessageInput && !state.isLoading) {
-                    elements.partyMessageInput.value = btn.textContent;
-                    sendPartyMessage();
-                }
-            });
-        });
-    }
-}
-
-function hideSuggestionPills() {
-    if (elements.partySuggestionPills) {
-        elements.partySuggestionPills.innerHTML = '';
-    }
-}
-
-async function fetchFollowUpSuggestions(lastResponse) {
-    // Show placeholder suggestions immediately
-    const placeholders = ["Thinking...", "Thinking...", "Thinking..."];
-    renderSuggestionPills(placeholders, true);
-    
-    try {
-        const response = await fetch('/api/dinner-party/suggestions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                guests: state.selectedGuests,
-                history: state.partyConversationHistory.slice(-4),
-                last_response: lastResponse.substring(0, 500)
-            })
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            if (data.suggestions && data.suggestions.length > 0) {
-                renderSuggestionPills(data.suggestions);
-                return;
-            }
-        }
-    } catch (error) {
-        console.error('Failed to fetch suggestions:', error);
-    }
-    
-    // Fallback to local suggestions
-    const fallback = getLocalFollowUpSuggestions(lastResponse);
-    renderSuggestionPills(fallback);
-}
-
-function getLocalFollowUpSuggestions(lastResponse) {
-    const response = lastResponse.toLowerCase();
-    const suggestions = [];
-    
-    // Context-aware based on keywords
-    if (response.includes('disagree') || response.includes('however')) {
-        suggestions.push("Explain your disagreement?");
-    }
-    if (response.includes('war') || response.includes('battle')) {
-        suggestions.push("Is war ever justified?");
-    }
-    if (response.includes('love') || response.includes('family')) {
-        suggestions.push("How did love shape your work?");
-    }
-    if (response.includes('death') || response.includes('legacy')) {
-        suggestions.push("How do you want to be remembered?");
-    }
-    
-    // General follow-ups
-    const general = [
-        "Do you all agree?",
-        "Ask each other something!",
-        "What would surprise you today?",
-        "Share a secret!",
-        "Debate this more!"
-    ];
-    
-    const shuffled = general.sort(() => Math.random() - 0.5);
-    for (const q of shuffled) {
-        if (suggestions.length >= 3) break;
-        if (!suggestions.includes(q)) suggestions.push(q);
-    }
-    
-    return suggestions.slice(0, 3);
 }
 
 function getPartyWelcomeMessage() {
@@ -1195,7 +1064,7 @@ function getPartyWelcomeMessage() {
         ? `${guestNames.join(', ')} and ${lastGuest}` 
         : lastGuest;
     
-    return `*The candles flicker as ${guestList} take their seats at the table*\n\nWelcome to this extraordinary gathering across time. Your distinguished guests await your first question or topic of discussion.`;
+    return `*The candles flicker as ${guestList} take their seats at the table*\n\nWelcome to this extraordinary gathering. Your guests await your first question.`;
 }
 
 function renderPartyGuestsInfo() {
@@ -1263,11 +1132,7 @@ function renderPartyModelSelector() {
 }
 
 function showDinnerPartyConversation() {
-    // Hide all other views
-    elements.selectionView.classList.remove('active');
-    elements.conversationView.classList.remove('active');
     elements.dinnerPartyView.classList.remove('active');
-    // Show dinner party conversation
     elements.dinnerPartyConversationView.classList.add('active');
     document.body.classList.add('in-conversation');
 }
@@ -1332,7 +1197,7 @@ async function sendPartyMessage() {
     const message = elements.partyMessageInput.value.trim();
     if (!message || state.isLoading) return;
     
-    // Hide suggestions while loading
+    // Hide suggestions while sending
     hideSuggestionPills();
     
     // Add user message
@@ -1417,11 +1282,11 @@ async function sendPartyMessage() {
         // Save to history
         state.partyConversationHistory.push({ role: 'assistant', content: fullResponse });
         
-        // Fetch follow-up suggestions immediately (don't await)
-        fetchFollowUpSuggestions(fullResponse);
-        
         // Auto-save
         autoSaveConversation();
+        
+        // Fetch follow-up suggestions immediately (non-blocking)
+        fetchFollowUpSuggestions(fullResponse);
         
     } catch (error) {
         console.error('Dinner party chat error:', error);
@@ -1522,6 +1387,156 @@ function updatePartySendButtonState() {
         const hasText = elements.partyMessageInput.value.trim().length > 0;
         elements.partySendBtn.disabled = !hasText || state.isLoading;
     }
+}
+
+// ===== SUGGESTION PILLS =====
+
+function getWelcomeSuggestions() {
+    const guestIds = state.selectedGuests;
+    const suggestions = [];
+    
+    // Category-specific starters based on guests
+    const hasScientists = guestIds.some(id => ['einstein', 'curie', 'tesla', 'ada'].includes(id));
+    const hasLeaders = guestIds.some(id => ['caesar', 'cleopatra', 'napoleon', 'elizabeth', 'genghis', 'lincoln'].includes(id));
+    const hasPhilosophers = guestIds.some(id => ['socrates', 'aurelius', 'gandhi'].includes(id));
+    const hasArtists = guestIds.some(id => ['davinci', 'shakespeare', 'frida'].includes(id));
+    
+    if (hasScientists) suggestions.push("What discovery changed humanity most?");
+    if (hasLeaders) suggestions.push("What defines true leadership?");
+    if (hasPhilosophers) suggestions.push("What is the meaning of a good life?");
+    if (hasArtists) suggestions.push("How does art shape civilization?");
+    
+    // Universal starters
+    const universal = [
+        "What would you change about your era?",
+        "What advice for today's world?",
+        "What's your greatest regret?",
+        "What would surprise you about today?",
+        "How do you want to be remembered?"
+    ];
+    
+    // Fill to 3 suggestions
+    for (const q of universal) {
+        if (suggestions.length >= 3) break;
+        if (!suggestions.includes(q)) suggestions.push(q);
+    }
+    
+    return suggestions.slice(0, 3);
+}
+
+function showWelcomeSuggestions() {
+    const suggestions = getWelcomeSuggestions();
+    renderSuggestionPills(suggestions);
+}
+
+function renderSuggestionPills(suggestions, loading = false) {
+    if (!elements.partySuggestionPills) return;
+    
+    if (suggestions.length === 0) {
+        elements.partySuggestionPills.innerHTML = '';
+        return;
+    }
+    
+    elements.partySuggestionPills.innerHTML = suggestions.map(s => 
+        `<button class="suggestion-pill${loading ? ' loading' : ''}" type="button">${escapeHtml(s)}</button>`
+    ).join('');
+    
+    if (!loading) {
+        elements.partySuggestionPills.querySelectorAll('.suggestion-pill').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (elements.partyMessageInput && !state.isLoading) {
+                    elements.partyMessageInput.value = btn.textContent;
+                    elements.partyMessageInput.focus();
+                    updatePartySendButtonState();
+                }
+            });
+        });
+    }
+}
+
+function hideSuggestionPills() {
+    if (elements.partySuggestionPills) {
+        elements.partySuggestionPills.innerHTML = '';
+    }
+}
+
+async function fetchFollowUpSuggestions(lastResponse) {
+    // Show placeholder suggestions immediately for instant feedback
+    const placeholders = ["Thinking...", "Thinking...", "Thinking..."];
+    renderSuggestionPills(placeholders, true);
+    
+    // Start fetching in background - don't await, let it update when ready
+    fetch('/api/dinner-party/suggestions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            guests: state.selectedGuests,
+            history: state.partyConversationHistory.slice(-4),
+            last_response: lastResponse.substring(0, 500)
+        })
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        }
+        throw new Error('Failed to fetch');
+    })
+    .then(data => {
+        if (data.suggestions && data.suggestions.length > 0) {
+            renderSuggestionPills(data.suggestions);
+            return;
+        }
+        throw new Error('No suggestions');
+    })
+    .catch(error => {
+        console.error('Failed to fetch suggestions:', error);
+        // Fallback to local suggestions instantly
+        const fallback = getLocalFollowUpSuggestions(lastResponse);
+        renderSuggestionPills(fallback);
+    });
+}
+
+function getLocalFollowUpSuggestions(lastResponse) {
+    const response = lastResponse.toLowerCase();
+    const suggestions = [];
+    
+    // Context-aware based on keywords
+    if (response.includes('disagree') || response.includes('however') || response.includes('but')) {
+        suggestions.push("Explain your disagreement?");
+    }
+    if (response.includes('war') || response.includes('battle') || response.includes('conflict')) {
+        suggestions.push("Is war ever justified?");
+    }
+    if (response.includes('love') || response.includes('family') || response.includes('relationship')) {
+        suggestions.push("How did love shape your work?");
+    }
+    if (response.includes('death') || response.includes('legacy') || response.includes('remember')) {
+        suggestions.push("How do you want to be remembered?");
+    }
+    if (response.includes('science') || response.includes('discover') || response.includes('research')) {
+        suggestions.push("What's the future of science?");
+    }
+    if (response.includes('art') || response.includes('creativ') || response.includes('beauty')) {
+        suggestions.push("What makes art timeless?");
+    }
+    
+    // General follow-ups
+    const general = [
+        "Do you all agree?",
+        "What would surprise you today?",
+        "Share something unexpected!",
+        "Debate this more!",
+        "What's your secret?",
+        "Ask each other something!"
+    ];
+    
+    const shuffled = [...general].sort(() => Math.random() - 0.5);
+    for (const q of shuffled) {
+        if (suggestions.length >= 3) break;
+        if (!suggestions.includes(q)) suggestions.push(q);
+    }
+    
+    return suggestions.slice(0, 3);
 }
 
 function copyPartyConversation() {

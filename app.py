@@ -679,6 +679,7 @@ def api_dinner_party_suggestions():
     """
     Generate follow-up question suggestions for dinner party using LLM.
     Returns quickly with 3 contextual suggestions.
+    Uses a fast, lightweight prompt for speed.
     """
     try:
         data = request.get_json()
@@ -697,26 +698,19 @@ def api_dinner_party_suggestions():
             if figure:
                 guest_names.append(figure['name'])
         
-        # Create a prompt for generating suggestions
-        prompt = f"""You are helping a user have a dinner party conversation with these historical figures: {', '.join(guest_names)}.
+        # Create a concise prompt for generating suggestions quickly
+        prompt = f"""Generate 3 short follow-up questions (under 40 chars each) for a dinner party with {', '.join(guest_names[:3])}.
 
-Based on the last response from the guests:
-"{last_response[:300]}..."
+Last response: "{last_response[:200]}..."
 
-Generate exactly 3 short, engaging follow-up questions the user could ask next. 
-- Keep each under 30 characters
-- Make them provocative and interesting
-- They should spark debate between the guests
-
-Return ONLY a JSON array with 3 strings, nothing else. Example:
-["Question 1?", "Question 2?", "Question 3?"]"""
-
+Return ONLY a JSON array: ["Question 1?", "Question 2?", "Question 3?"]"""
+        
         messages = [
-            {"role": "system", "content": "You generate short, engaging discussion questions. Return only valid JSON array."},
+            {"role": "system", "content": "You generate short, engaging discussion questions. Return only valid JSON array, no other text."},
             {"role": "user", "content": prompt}
         ]
         
-        # Use a fast model for quick suggestions
+        # Use a fast model for quick suggestions (or default to fastest available)
         response, is_error = call_llm(messages, None)
         
         if is_error:
@@ -725,16 +719,18 @@ Return ONLY a JSON array with 3 strings, nothing else. Example:
         # Parse JSON response
         try:
             import re
+            import json
             # Find JSON array in response
             match = re.search(r'\[.*?\]', response, re.DOTALL)
             if match:
-                import json
                 suggestions = json.loads(match.group())
                 if isinstance(suggestions, list) and len(suggestions) >= 3:
-                    # Truncate long suggestions
-                    suggestions = [s[:35] for s in suggestions[:3]]
-                    return jsonify({"suggestions": suggestions}), 200
-        except:
+                    # Truncate long suggestions and clean up
+                    suggestions = [s.strip()[:40] for s in suggestions[:3] if s.strip()]
+                    if len(suggestions) >= 3:
+                        return jsonify({"suggestions": suggestions}), 200
+        except Exception as e:
+            app.logger.debug(f"JSON parse error: {e}")
             pass
         
         # Fallback
