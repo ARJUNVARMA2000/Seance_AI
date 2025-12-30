@@ -339,6 +339,89 @@ HISTORICAL_FIGURES = {
 }
 
 
+# Curated guest combinations for dinner parties
+CURATED_COMBOS = {
+    "philosophers": {
+        "name": "Philosophers",
+        "description": "The great thinkers debate the meaning of life",
+        "guests": ["socrates", "aurelius", "gandhi"]
+    },
+    "scientists": {
+        "name": "Scientists",
+        "description": "Brilliant minds discuss the nature of reality",
+        "guests": ["einstein", "curie", "tesla", "ada"]
+    },
+    "leaders": {
+        "name": "Leaders",
+        "description": "Rulers and conquerors compare their legacies",
+        "guests": ["caesar", "cleopatra", "napoleon", "elizabeth"]
+    },
+    "artists": {
+        "name": "Artists",
+        "description": "Creative geniuses explore beauty and expression",
+        "guests": ["davinci", "shakespeare", "frida"]
+    },
+    "revolutionaries": {
+        "name": "Revolutionaries",
+        "description": "Those who changed the world through action",
+        "guests": ["lincoln", "tubman", "gandhi", "napoleon"]
+    }
+}
+
+
+DINNER_PARTY_PROMPT_TEMPLATE = """You are moderating a dinner party conversation featuring historical figures. The host (the user) has gathered these distinguished guests:
+
+{guest_descriptions}
+
+YOUR ROLE:
+You will respond AS EACH GUEST in turn, reacting to the host's question or comment. Each guest should:
+1. Stay in character with their documented personality and speaking style
+2. Respond to the host's message
+3. Optionally react to or engage with what other guests might say
+4. Be engaging and create an interesting group dynamic
+
+RESPONSE FORMAT:
+Respond for each guest in order, using this format:
+[GUEST_ID]: Their response here...
+
+For example:
+[einstein]: *adjusts spectacles thoughtfully* Ah, what a fascinating question...
+
+[curie]: *sets down her tea cup* I must respectfully disagree with Albert on this point...
+
+RULES:
+- Each guest's response should be 1-2 paragraphs
+- Use their authentic speaking style and vocabulary
+- Include *actions* in italics for atmosphere
+- Create natural conversation flow - guests can agree, disagree, or build on each other's points
+- The host's question/comment should be addressed by at least 2-3 guests
+- Keep the tone appropriate for a refined dinner party, though spirited debate is welcome
+
+The guests are seated around a candlelit table. Respond to the host now."""
+
+
+def get_dinner_party_prompt(guest_ids: list) -> str:
+    """Generate the system prompt for a dinner party with multiple guests."""
+    guest_descriptions = []
+    
+    for guest_id in guest_ids:
+        figure = HISTORICAL_FIGURES.get(guest_id)
+        if figure:
+            # Handle BCE dates
+            birth = f"{abs(figure['birth_year'])} BCE" if figure['birth_year'] < 0 else str(figure['birth_year'])
+            death = f"{abs(figure['death_year'])} BCE" if figure['death_year'] < 0 else str(figure['death_year'])
+            
+            desc = f"""**{figure['name']}** ({figure['title']}, {birth}-{death})
+- Personality: {figure['personality']}
+- Beliefs: {figure['beliefs']}
+- Guest ID for responses: [{guest_id}]"""
+            guest_descriptions.append(desc)
+    
+    return DINNER_PARTY_PROMPT_TEMPLATE.format(
+        guest_descriptions='\n\n'.join(guest_descriptions)
+    )
+
+
 def get_system_prompt(figure_id: str) -> str:
     """Generate the system prompt for a historical figure."""
     figure = HISTORICAL_FIGURES.get(figure_id)

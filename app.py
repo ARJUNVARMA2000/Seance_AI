@@ -17,7 +17,7 @@ import requests
 from typing import Tuple
 from flask import Flask, render_template, jsonify, request, Response
 from dotenv import load_dotenv
-from figures import get_all_figures, get_figure, get_system_prompt
+from figures import get_all_figures, get_figure, get_system_prompt, get_dinner_party_prompt, CURATED_COMBOS
 
 # Load environment variables
 load_dotenv()
@@ -464,6 +464,214 @@ def api_chat_stream():
     except Exception as e:
         app.logger.error(f"Stream chat error: {e}")
         return jsonify({"error": "An unexpected error occurred. Please try again."}), 500
+
+
+@app.route('/api/dinner-party/combos')
+def api_dinner_party_combos():
+    """Return curated guest combinations for dinner parties."""
+    return jsonify({"combos": CURATED_COMBOS})
+
+
+@app.route('/api/dinner-party/chat', methods=['POST'])
+def api_dinner_party_chat():
+    """
+    Handle dinner party messages where multiple figures respond.
+    Uses a single LLM call with structured output for efficiency.
+    """
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+        
+        guest_ids = data.get('guests', [])
+        user_message = data.get('message', '').strip()
+        history = data.get('history', [])
+        model = data.get('model')
+        
+        if not guest_ids or len(guest_ids) < 2:
+            return jsonify({"error": "At least 2 guests required"}), 400
+        
+        if len(guest_ids) > 5:
+            return jsonify({"error": "Maximum 5 guests allowed"}), 400
+        
+        if not user_message:
+            return jsonify({"error": "No message provided"}), 400
+        
+        # Validate all guests exist
+        guests = []
+        for guest_id in guest_ids:
+            figure = get_figure(guest_id)
+            if not figure:
+                return jsonify({"error": f"Guest '{guest_id}' not found"}), 404
+            guests.append(figure)
+        
+        # Build the dinner party system prompt
+        system_prompt = get_dinner_party_prompt(guest_ids)
+        
+        # Build messages for the API
+        messages = [{"role": "system", "content": system_prompt}]
+        
+        # Add conversation history
+        for msg in history[-MAX_HISTORY:]:
+            messages.append({
+                "role": msg.get("role", "user"),
+                "content": msg.get("content", "")
+            })
+        
+        # Add the new user message
+        messages.append({"role": "user", "content": user_message})
+        
+        # Get AI response
+        ai_response, is_error = call_llm(messages, model)
+        
+        if is_error:
+            return jsonify({
+                "error": ai_response,
+                "guests": guests
+            }), 500
+        
+        # Parse the response - the LLM returns responses for each figure
+        # Format expected: [FIGURE_ID]: response text
+        responses = parse_dinner_party_response(ai_response, guest_ids)
+        
+        return jsonify({
+            "responses": responses,
+            "raw_response": ai_response,
+            "guests": guests
+        })
+        
+    except Exception as e:
+        app.logger.error(f"Dinner party chat error: {e}")
+        return jsonify({"error": "An unexpected error occurred. Please try again."}), 500
+
+
+@app.route('/api/dinner-party/chat/stream', methods=['POST'])
+def api_dinner_party_chat_stream():
+    """
+    Handle streaming dinner party messages using Server-Sent Events.
+    """
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+        
+        guest_ids = data.get('guests', [])
+        user_message = data.get('message', '').strip()
+        history = data.get('history', [])
+        model = data.get('model')
+        
+        if not guest_ids or len(guest_ids) < 2:
+            return jsonify({"error": "At least 2 guests required"}), 400
+        
+        if len(guest_ids) > 5:
+            return jsonify({"error": "Maximum 5 guests allowed"}), 400
+        
+        if not user_message:
+            return jsonify({"error": "No message provided"}), 400
+        
+        # Validate all guests exist
+        for guest_id in guest_ids:
+            if not get_figure(guest_id):
+                return jsonify({"error": f"Guest '{guest_id}' not found"}), 404
+        
+        # Build the dinner party system prompt
+        system_prompt = get_dinner_party_prompt(guest_ids)
+        
+        # Build messages for the API
+        messages = [{"role": "system", "content": system_prompt}]
+        
+        # Add conversation history
+        for msg in history[-MAX_HISTORY:]:
+            messages.append({
+                "role": msg.get("role", "user"),
+                "content": msg.get("content", "")
+            })
+        
+        # Add the new user message
+        messages.append({"role": "user", "content": user_message})
+        
+        # Return streaming response
+        return Response(
+            stream_llm(messages, model),
+            mimetype='text/event-stream',
+            headers={
+                'Cache-Control': 'no-cache',
+                'Connection': 'keep-alive',
+                'X-Accel-Buffering': 'no'
+            }
+        )
+        
+    except Exception as e:
+        app.logger.error(f"Dinner party stream error: {e}")
+        return jsonify({"error": "An unexpected error occurred. Please try again."}), 500
+
+
+def parse_dinner_party_response(response: str, guest_ids: list) -> list:
+    """
+    Parse the dinner party response into individual figure responses.
+    Expected format: [FIGURE_ID]: response text
+    """
+    responses = []
+    current_figure = None
+    current_text = []
+    
+    lines = response.strip().split('\n')
+    
+    for line in lines:
+        # Check if this line starts a new figure's response
+        found_figure = False
+        for guest_id in guest_ids:
+            # Check for various formats: [einstein]:, EINSTEIN:, **Einstein:**
+            markers = [
+                f"[{guest_id}]:",
+                f"[{guest_id.upper()}]:",
+                f"{guest_id.upper()}:",
+                f"**{guest_id.title()}:**",
+                f"**{get_figure(guest_id)['name']}:**",
+                f"{get_figure(guest_id)['name']}:",
+            ]
+            for marker in markers:
+                if line.strip().upper().startswith(marker.upper().rstrip(':')):
+                    # Save previous figure's response
+                    if current_figure and current_text:
+                        responses.append({
+                            "figure_id": current_figure,
+                            "response": '\n'.join(current_text).strip()
+                        })
+                    
+                    current_figure = guest_id
+                    # Extract text after the marker
+                    remaining = line
+                    for m in markers:
+                        if remaining.strip().upper().startswith(m.upper().rstrip(':')):
+                            remaining = remaining[len(m):].strip()
+                            break
+                    current_text = [remaining] if remaining else []
+                    found_figure = True
+                    break
+            if found_figure:
+                break
+        
+        if not found_figure and current_figure:
+            current_text.append(line)
+    
+    # Don't forget the last figure's response
+    if current_figure and current_text:
+        responses.append({
+            "figure_id": current_figure,
+            "response": '\n'.join(current_text).strip()
+        })
+    
+    # If parsing failed, return the whole response attributed to first guest
+    if not responses and response.strip():
+        responses.append({
+            "figure_id": guest_ids[0],
+            "response": response.strip()
+        })
+    
+    return responses
 
 
 @app.route('/api/suggestions', methods=['POST'])
