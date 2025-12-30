@@ -679,7 +679,6 @@ def api_dinner_party_suggestions():
     """
     Generate follow-up question suggestions for dinner party using LLM.
     Returns quickly with 3 contextual suggestions.
-    Uses a fast, lightweight prompt for speed.
     """
     try:
         data = request.get_json()
@@ -698,7 +697,6 @@ def api_dinner_party_suggestions():
             if figure:
                 guest_names.append(figure['name'])
         
-        # Create a concise prompt for generating suggestions quickly
         prompt = f"""Generate 3 short follow-up questions (under 40 chars each) for a dinner party with {', '.join(guest_names[:3])}.
 
 Last response: "{last_response[:200]}..."
@@ -710,7 +708,6 @@ Return ONLY a JSON array: ["Question 1?", "Question 2?", "Question 3?"]"""
             {"role": "user", "content": prompt}
         ]
         
-        # Use a fast model for quick suggestions (or default to fastest available)
         response, is_error = call_llm(messages, None)
         
         if is_error:
@@ -720,17 +717,14 @@ Return ONLY a JSON array: ["Question 1?", "Question 2?", "Question 3?"]"""
         try:
             import re
             import json
-            # Find JSON array in response
             match = re.search(r'\[.*?\]', response, re.DOTALL)
             if match:
                 suggestions = json.loads(match.group())
                 if isinstance(suggestions, list) and len(suggestions) >= 3:
-                    # Truncate long suggestions and clean up
                     suggestions = [s.strip()[:40] for s in suggestions[:3] if s.strip()]
                     if len(suggestions) >= 3:
                         return jsonify({"suggestions": suggestions}), 200
-        except Exception as e:
-            app.logger.debug(f"JSON parse error: {e}")
+        except Exception:
             pass
         
         # Fallback

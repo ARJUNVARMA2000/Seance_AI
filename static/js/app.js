@@ -1285,7 +1285,6 @@ async function sendPartyMessage() {
         // Auto-save
         autoSaveConversation();
         
-        // Fetch follow-up suggestions immediately (non-blocking)
         fetchFollowUpSuggestions(fullResponse);
         
     } catch (error) {
@@ -1461,11 +1460,9 @@ function hideSuggestionPills() {
 }
 
 async function fetchFollowUpSuggestions(lastResponse) {
-    // Show placeholder suggestions immediately for instant feedback
     const placeholders = ["Thinking...", "Thinking...", "Thinking..."];
     renderSuggestionPills(placeholders, true);
     
-    // Start fetching in background - don't await, let it update when ready
     fetch('/api/dinner-party/suggestions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1490,7 +1487,6 @@ async function fetchFollowUpSuggestions(lastResponse) {
     })
     .catch(error => {
         console.error('Failed to fetch suggestions:', error);
-        // Fallback to local suggestions instantly
         const fallback = getLocalFollowUpSuggestions(lastResponse);
         renderSuggestionPills(fallback);
     });
