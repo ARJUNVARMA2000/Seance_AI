@@ -1,4 +1,4 @@
-# ☽ SeanceAI - Commune with the Minds of History
+# ☽ SeanceAI - Commune with the Minds of History at https://sceance-ai.up.railway.app/
 
 > **Step into a digital séance and converse with the greatest minds humanity has ever known.** From Einstein's thought experiments to Cleopatra's political wisdom, from da Vinci's boundless curiosity to Lincoln's moral clarity—experience history through authentic, AI-powered conversations.
 
