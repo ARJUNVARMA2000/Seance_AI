@@ -2,7 +2,7 @@
 
 > **Step into a digital séance and converse with the greatest minds humanity has ever known.** From Einstein's thought experiments to Cleopatra's political wisdom, from da Vinci's boundless curiosity to Lincoln's moral clarity—experience history through authentic, AI-powered conversations.
 
-[![Live Demo](https://img.shields.io/badge/🚀-Try%20Live%20Demo-blue?style=for-the-badge)](https://sceance-ai.up.railway.app)
+[![Live Demo](https://img.shields.io/badge/🚀-Try%20Live%20Demo-blue?style=for-the-badge)](https://seance-ai.up.railway.app)
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge)](LICENSE)
 
 ---
@@ -56,7 +56,7 @@
 
 ## 📸 See It In Action
 
-**Experience the magic yourself:** [Try the live demo](https://sceance-ai.up.railway.app) or [run it locally](#-quick-start-for-developers)
+**Experience the magic yourself:** [Try the live demo](https://seance-ai.up.railway.app) or [run it locally](#-quick-start-for-developers)
 
 ### Screenshots
 
