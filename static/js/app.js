@@ -369,17 +369,20 @@ async function selectFigure(figure) {
     state.currentConversationId = null;
     state.currentBranchId = 'main';
     state.conversationBranches = {};
-    
+
+    // Play summoning animation
+    await playSummoningAnimation(figure);
+
     // Update UI
     renderCurrentFigure();
     renderStarterQuestions();
     clearMessages();
     showConversationView();
     renderBranchSelector();
-    
+
     // Add welcome message (no suggestions - starter questions are shown separately)
     addMessage('figure', `*The spirit of ${figure.name} materializes before you*\n\nGreetings, traveler through time. I am ${figure.name}, ${figure.title}. What wisdom do you seek from my era?`, false);
-    
+
     elements.messageInput.focus();
 }
 
@@ -493,7 +496,12 @@ function addMessage(role, content, showSuggestions = false, messageIndex = null)
     
     elements.messages.appendChild(messageDiv);
     scrollToBottom();
-    
+
+    // Add aura effect for new AI messages
+    if (role === 'figure' && typeof addNewMessageAura === 'function') {
+        addNewMessageAura(messageDiv);
+    }
+
     // Fetch suggestions if this is a figure message and we should show them
     if (role === 'figure' && showSuggestions) {
         fetchSuggestions(content, messageDiv);
@@ -2749,5 +2757,111 @@ function setupEventListeners() {
             }
         }
     });
+
+    // Initialize mystical effects
+    initMysticalEffects();
+}
+
+// ===== MYSTICAL UI EFFECTS =====
+
+function initMysticalEffects() {
+    // Card glow following cursor
+    initCardGlowEffect();
+
+    // Add ripple class to buttons
+    document.querySelectorAll('.send-button, .start-party-btn, .starter-btn, .tab-btn').forEach(btn => {
+        btn.classList.add('ripple-btn');
+    });
+}
+
+// Card glow effect that follows cursor
+function initCardGlowEffect() {
+    document.addEventListener('mousemove', (e) => {
+        const cards = document.querySelectorAll('.figure-card, .guest-card');
+        cards.forEach(card => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // Only update if cursor is near the card
+            const padding = 100;
+            if (x >= -padding && x <= rect.width + padding &&
+                y >= -padding && y <= rect.height + padding) {
+                card.style.setProperty('--card-glow-x', `${x}px`);
+                card.style.setProperty('--card-glow-y', `${y}px`);
+            }
+        });
+    });
+}
+
+// Summoning animation elements
+const summoningElements = {
+    overlay: null,
+    portrait: null
+};
+
+// Initialize summoning elements
+function initSummoningElements() {
+    summoningElements.overlay = document.getElementById('summoning-overlay');
+    summoningElements.portrait = document.getElementById('summoning-portrait');
+}
+
+// Play summoning animation
+function playSummoningAnimation(figure) {
+    return new Promise((resolve) => {
+        if (!summoningElements.overlay) {
+            initSummoningElements();
+        }
+
+        if (!summoningElements.overlay) {
+            resolve();
+            return;
+        }
+
+        // Set portrait
+        const portraitImg = summoningElements.portrait?.querySelector('img');
+        if (portraitImg) {
+            portraitImg.src = `/static/images/figures/${figure.id}.svg`;
+            portraitImg.onerror = () => { portraitImg.src = '/static/images/figures/default.svg'; };
+        }
+
+        // Add candle flicker effect to body
+        document.body.classList.add('candle-flicker');
+
+        // Show overlay
+        summoningElements.overlay.classList.add('active');
+
+        // Reset ring animations
+        const rings = summoningElements.overlay.querySelectorAll('.summoning-ring');
+        rings.forEach(ring => {
+            ring.style.animation = 'none';
+            ring.offsetHeight; // Trigger reflow
+            ring.style.animation = null;
+        });
+
+        // Reset portrait animation
+        if (summoningElements.portrait) {
+            summoningElements.portrait.style.animation = 'none';
+            summoningElements.portrait.offsetHeight;
+            summoningElements.portrait.style.animation = null;
+        }
+
+        // Hide after animation
+        setTimeout(() => {
+            summoningElements.overlay.classList.remove('active');
+            document.body.classList.remove('candle-flicker');
+            resolve();
+        }, 1500);
+    });
+}
+
+// Add new-message class for aura effect
+function addNewMessageAura(messageElement) {
+    if (messageElement && messageElement.classList.contains('figure-message')) {
+        messageElement.classList.add('new-message');
+        setTimeout(() => {
+            messageElement.classList.remove('new-message');
+        }, 2000);
+    }
 }
 
