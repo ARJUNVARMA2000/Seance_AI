@@ -870,6 +870,7 @@ body.light-mode #model-selector {
     color: var(--accent-gold);
 }
 
+.share-button,
 .copy-button,
 .download-button {
     width: 36px;
@@ -889,12 +890,24 @@ body.light-mode #model-selector {
     color: var(--text-secondary);
 }
 
+.share-button:hover,
 .copy-button:hover,
 .download-button:hover {
     background: var(--bg-hover);
     border-color: var(--accent-blue);
     color: var(--accent-blue);
     transform: scale(1.05);
+}
+
+.share-button .share-icon,
+.copy-button .copy-icon,
+.download-button .download-icon {
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
 }
 
 /* ===== Chat Container ===== */
@@ -2345,6 +2358,7 @@ body.light-mode #model-selector {
     .main-footer,
     .chat-form,
     .back-button,
+    .share-button,
     .copy-button,
     .starter-questions {
         display: none;

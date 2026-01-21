@@ -44,6 +44,7 @@ const elements = {
     messageInput: document.getElementById('message-input'),
     sendBtn: document.getElementById('send-btn'),
     backBtn: document.getElementById('back-btn'),
+    shareBtn: document.getElementById('share-btn'),
     copyBtn: document.getElementById('copy-btn'),
     toast: document.getElementById('toast'),
     toastMessage: document.getElementById('toast-message'),
@@ -68,6 +69,7 @@ const elements = {
     partyMessageInput: document.getElementById('party-message-input'),
     partySendBtn: document.getElementById('party-send-btn'),
     partyBackBtn: document.getElementById('party-back-btn'),
+    partyShareBtn: document.getElementById('party-share-btn'),
     partyCopyBtn: document.getElementById('party-copy-btn'),
     partyDownloadBtn: document.getElementById('party-download-btn'),
     partyModelSelector: document.getElementById('party-model-selector'),
@@ -95,6 +97,94 @@ async function init() {
     setupEventListeners();
     renderGuestGrid();
     renderPartyModelSelector();
+    
+    // Check for shared conversation link
+    handleShareLink();
+}
+
+// Handle shared conversation links
+function handleShareLink() {
+    const hash = window.location.hash;
+    if (!hash || !hash.startsWith('#share=')) {
+        return;
+    }
+    
+    const shareId = hash.substring(7); // Remove '#share='
+    const shareKey = `seanceai-share-${shareId}`;
+    
+    try {
+        const shareDataStr = localStorage.getItem(shareKey);
+        if (!shareDataStr) {
+            showToast('Shared conversation not found or has expired');
+            // Clean up the hash
+            window.history.replaceState(null, '', window.location.pathname);
+            return;
+        }
+        
+        const shareData = JSON.parse(shareDataStr);
+        
+        if (shareData.type === 'dinner-party') {
+            // Load dinner party conversation
+            state.selectedGuests = [...shareData.guests];
+            state.partyConversationHistory = [...shareData.history];
+            
+            renderPartyGuestsInfo();
+            clearPartyMessages();
+            
+            // Replay messages
+            shareData.history.forEach(msg => {
+                if (msg.role === 'user') {
+                    addPartyMessage('user', msg.content);
+                } else {
+                    parseAndDisplayPartyResponses(msg.content);
+                }
+            });
+            
+            switchTab('dinner-party');
+            showDinnerPartyConversation();
+            showToast(`Loaded shared conversation: ${shareData.guestNames}`);
+        } else {
+            // Load seance conversation
+            const figure = state.figures.find(f => f.id === shareData.figure_id);
+            if (!figure) {
+                showToast('Historical figure not found');
+                window.history.replaceState(null, '', window.location.pathname);
+                return;
+            }
+            
+            state.currentFigure = figure;
+            state.conversationHistory = [...shareData.history];
+            
+            // Handle branch if present
+            if (shareData.branch_id && shareData.branch_id !== 'main') {
+                state.currentBranchId = shareData.branch_id;
+            } else {
+                state.currentBranchId = 'main';
+            }
+            
+            renderCurrentFigure();
+            clearMessages();
+            hideStarterQuestions();
+            renderBranchSelector();
+            
+            // Replay messages
+            shareData.history.forEach((msg, index) => {
+                addMessage(msg.role === 'user' ? 'user' : 'figure', msg.content, false, index);
+            });
+            
+            switchTab('seance');
+            showConversationView();
+            showToast(`Loaded shared conversation with ${shareData.figure_name}`);
+        }
+        
+        // Clean up the hash
+        window.history.replaceState(null, '', window.location.pathname);
+        
+    } catch (error) {
+        console.error('Failed to load shared conversation:', error);
+        showToast('Failed to load shared conversation');
+        window.history.replaceState(null, '', window.location.pathname);
+    }
 }
 
 // Initialize theme from localStorage
@@ -913,6 +1003,189 @@ function showSelectionView() {
     state.conversationBranches = {};
     renderBranchSelector();
     showStarterQuestions();
+}
+
+// Share conversation - generate shareable link or use Web Share API
+async function shareConversation() {
+    if (!state.currentFigure && !state.selectedGuests.length) {
+        showToast('No conversation to share');
+        return;
+    }
+    
+    const isParty = elements.dinnerPartyConversationView?.classList.contains('active');
+    const history = isParty ? state.partyConversationHistory : getCurrentHistory();
+    
+    if (history.length === 0) {
+        showToast('No conversation to share');
+        return;
+    }
+    
+    // Prepare conversation data for sharing
+    let shareData = {
+        type: isParty ? 'dinner-party' : 'seance',
+        timestamp: new Date().toISOString()
+    };
+    
+    if (isParty) {
+        const guestNames = state.selectedGuests.map(id => {
+            const figure = state.figures.find(f => f.id === id);
+            return figure ? figure.name : id;
+        }).join(', ');
+        shareData.guests = state.selectedGuests;
+        shareData.guestNames = guestNames;
+        shareData.history = history;
+    } else {
+        shareData.figure_id = state.currentFigure.id;
+        shareData.figure_name = state.currentFigure.name;
+        shareData.history = history;
+        shareData.branch_id = state.currentBranchId;
+    }
+    
+    // Create shareable text
+    let shareText = '';
+    if (isParty) {
+        shareText = `🍷 Dinner Party Conversation with ${shareData.guestNames}\n\n`;
+    } else {
+        shareData.branchName = state.currentBranchId !== 'main' && state.conversationBranches[state.currentConversationId] 
+            ? state.conversationBranches[state.currentConversationId][state.currentBranchId]?.name 
+            : null;
+        shareText = `☽ Conversation with ${shareData.figure_name}`;
+        if (shareData.branchName) {
+            shareText += ` (${shareData.branchName})`;
+        }
+        shareText += '\n\n';
+    }
+    
+    history.forEach(msg => {
+        const author = msg.role === 'user' ? 'You' : (isParty ? 'Guest' : shareData.figure_name);
+        shareText += `${author}: ${msg.content}\n\n`;
+    });
+    
+    shareText += `---\nShared via SeanceAI - Talk to History\n${window.location.origin}`;
+    
+    // Try Web Share API first (mobile-friendly)
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: isParty 
+                    ? `Dinner Party: ${shareData.guestNames}` 
+                    : `Conversation with ${shareData.figure_name}`,
+                text: shareText,
+                url: window.location.origin
+            });
+            showToast('Conversation shared!');
+            return;
+        } catch (error) {
+            // User cancelled or error occurred, fall through to clipboard
+            if (error.name !== 'AbortError') {
+                console.error('Share error:', error);
+            }
+        }
+    }
+    
+    // Fallback: Copy shareable link to clipboard
+    // For now, we'll encode the conversation data in the URL hash
+    // In production, you might want to store this server-side and generate a short link
+    const shareId = generateShareId();
+    const shareUrl = `${window.location.origin}${window.location.pathname}#share=${shareId}`;
+    
+    // Store share data temporarily in localStorage (keyed by shareId)
+    // In production, you'd store this server-side
+    const shareKey = `seanceai-share-${shareId}`;
+    try {
+        localStorage.setItem(shareKey, JSON.stringify(shareData));
+        // Clean up old shares (keep last 10)
+        cleanupOldShares();
+    } catch (error) {
+        console.error('Failed to store share data:', error);
+    }
+    
+    // Copy URL to clipboard
+    try {
+        await navigator.clipboard.writeText(shareUrl);
+        showToast('Shareable link copied to clipboard!');
+    } catch (error) {
+        // Fallback: show the URL in a prompt
+        const userConfirmed = confirm(`Share this conversation?\n\nCopy this link:\n${shareUrl}`);
+        if (userConfirmed) {
+            // Try to copy again or show the URL
+            try {
+                await navigator.clipboard.writeText(shareUrl);
+                showToast('Link copied!');
+            } catch (e) {
+                showToast(`Share link: ${shareUrl}`);
+            }
+        }
+    }
+}
+
+// Generate a unique share ID
+function generateShareId() {
+    return 'share-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+}
+
+// Clean up old shared conversations (keep last 10)
+function cleanupOldShares() {
+    try {
+        const keys = Object.keys(localStorage);
+        const shareKeys = keys.filter(k => k.startsWith('seanceai-share-'));
+        if (shareKeys.length > 10) {
+            // Sort by timestamp (in ID) and remove oldest
+            shareKeys.sort().slice(0, shareKeys.length - 10).forEach(k => {
+                localStorage.removeItem(k);
+            });
+        }
+    } catch (error) {
+        console.error('Failed to cleanup shares:', error);
+    }
+}
+
+// Share party conversation
+async function sharePartyConversation() {
+    if (state.partyConversationHistory.length === 0) {
+        showToast('No conversation to share');
+        return;
+    }
+    
+    const guestNames = state.selectedGuests.map(id => {
+        const figure = state.figures.find(f => f.id === id);
+        return figure ? figure.name : id;
+    }).join(', ');
+    
+    let shareText = `🍷 Dinner Party Conversation\nGuests: ${guestNames}\n\n`;
+    shareText += `${'='.repeat(40)}\n\n`;
+    
+    state.partyConversationHistory.forEach(msg => {
+        const author = msg.role === 'user' ? 'You (Host)' : 'Guests';
+        shareText += `${author}:\n${msg.content}\n\n`;
+    });
+    
+    shareText += `---\nShared via SeanceAI - Dinner Party\n${window.location.origin}`;
+    
+    // Try Web Share API first
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: `Dinner Party: ${guestNames}`,
+                text: shareText,
+                url: window.location.origin
+            });
+            showToast('Conversation shared!');
+            return;
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                console.error('Share error:', error);
+            }
+        }
+    }
+    
+    // Fallback: Copy to clipboard
+    try {
+        await navigator.clipboard.writeText(shareText);
+        showToast('Conversation copied to clipboard!');
+    } catch (error) {
+        showToast('Failed to share conversation');
+    }
 }
 
 // Copy conversation to clipboard
@@ -2359,6 +2632,9 @@ function setupEventListeners() {
     // Back button
     elements.backBtn.addEventListener('click', showSelectionView);
     
+    // Share button
+    elements.shareBtn.addEventListener('click', shareConversation);
+    
     // Copy button
     elements.copyBtn.addEventListener('click', copyConversation);
     
@@ -2408,6 +2684,9 @@ function setupEventListeners() {
     }
     if (elements.partyBackBtn) {
         elements.partyBackBtn.addEventListener('click', showDinnerPartySelection);
+    }
+    if (elements.partyShareBtn) {
+        elements.partyShareBtn.addEventListener('click', sharePartyConversation);
     }
     if (elements.partyCopyBtn) {
         elements.partyCopyBtn.addEventListener('click', copyPartyConversation);
