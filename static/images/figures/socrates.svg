@@ -1,11 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
-    <linearGradient id="bgSocrates" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#4a4a3a"/>
-      <stop offset="100%" style="stop-color:#2a2a20"/>
-    </linearGradient>
+    <radialGradient id="cosmicBgSocrates" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" style="stop-color:#1a1a4a"/>
+      <stop offset="50%" style="stop-color:#0d0d20"/>
+      <stop offset="100%" style="stop-color:#050510"/>
+    </radialGradient>
+    <radialGradient id="nebulaSocrates" cx="60%" cy="40%" r="55%">
+      <stop offset="0%" style="stop-color:#ffd700;stop-opacity:0.12"/>
+      <stop offset="100%" style="stop-color:#ffd700;stop-opacity:0"/>
+    </radialGradient>
   </defs>
-  <circle cx="50" cy="50" r="50" fill="url(#bgSocrates)"/>
+  <!-- Cosmic background -->
+  <circle cx="50" cy="50" r="50" fill="url(#cosmicBgSocrates)"/>
+  <circle cx="50" cy="50" r="50" fill="url(#nebulaSocrates)"/>
+  <!-- Stars -->
+  <circle cx="15" cy="18" r="0.7" fill="#ffd700" opacity="0.7"/>
+  <circle cx="85" cy="20" r="0.5" fill="#fff" opacity="0.6"/>
+  <circle cx="80" cy="75" r="0.6" fill="#4fc3f7" opacity="0.7"/>
+  <circle cx="20" cy="80" r="0.5" fill="#ffd700" opacity="0.5"/>
+  <circle cx="10" cy="50" r="0.4" fill="#fff" opacity="0.6"/>
+  <!-- Constellation line -->
+  <path d="M15 18 L30 32 M85 20 L72 35" stroke="#ffd700" stroke-width="0.3" opacity="0.25"/>
   <!-- Bald head -->
   <ellipse cx="50" cy="40" rx="22" ry="24" fill="#d4b89c"/>
   <!-- Curly beard -->
@@ -26,4 +41,3 @@
   <ellipse cx="50" cy="92" rx="28" ry="14" fill="#c4b89c"/>
   <path d="M28 85 Q50 75 72 85" stroke="#a09880" stroke-width="3" fill="none"/>
 </svg>
-

@@ -1,11 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
-    <linearGradient id="bgHawking" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#0d1f33"/>
-      <stop offset="100%" style="stop-color:#05101a"/>
-    </linearGradient>
+    <radialGradient id="cosmicBgHawking" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" style="stop-color:#1a1a4a"/>
+      <stop offset="50%" style="stop-color:#0d0d20"/>
+      <stop offset="100%" style="stop-color:#050510"/>
+    </radialGradient>
+    <radialGradient id="nebulaHawking" cx="40%" cy="40%" r="55%">
+      <stop offset="0%" style="stop-color:#7b2cbf;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#7b2cbf;stop-opacity:0"/>
+    </radialGradient>
   </defs>
-  <circle cx="50" cy="50" r="50" fill="url(#bgHawking)"/>
+  <!-- Cosmic background -->
+  <circle cx="50" cy="50" r="50" fill="url(#cosmicBgHawking)"/>
+  <circle cx="50" cy="50" r="50" fill="url(#nebulaHawking)"/>
+  <!-- Stars -->
+  <circle cx="15" cy="20" r="0.6" fill="#fff" opacity="0.7"/>
+  <circle cx="85" cy="18" r="0.5" fill="#4fc3f7" opacity="0.6"/>
+  <circle cx="80" cy="78" r="0.6" fill="#fff" opacity="0.5"/>
+  <circle cx="20" cy="82" r="0.5" fill="#4fc3f7" opacity="0.6"/>
+  <circle cx="10" cy="50" r="0.4" fill="#ffd700" opacity="0.5"/>
+  <path d="M15 20 L28 32 M85 18 L72 30" stroke="#7b2cbf" stroke-width="0.3" opacity="0.25"/>
   <!-- Wheelchair headrest hint -->
   <rect x="30" y="60" width="40" height="25" rx="5" fill="#3d3d4d"/>
   <!-- Thin hair -->
@@ -24,4 +38,3 @@
   <!-- Suit -->
   <ellipse cx="50" cy="85" rx="22" ry="18" fill="#2c3e50"/>
 </svg>
-

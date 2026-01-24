@@ -1,11 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
-    <linearGradient id="bgShake" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#3a2e4a"/>
-      <stop offset="100%" style="stop-color:#1f1828"/>
-    </linearGradient>
+    <radialGradient id="cosmicBgShake" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" style="stop-color:#1a1a4a"/>
+      <stop offset="50%" style="stop-color:#0d0d20"/>
+      <stop offset="100%" style="stop-color:#050510"/>
+    </radialGradient>
+    <radialGradient id="nebulaShake" cx="40%" cy="35%" r="55%">
+      <stop offset="0%" style="stop-color:#9d4edd;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#9d4edd;stop-opacity:0"/>
+    </radialGradient>
   </defs>
-  <circle cx="50" cy="50" r="50" fill="url(#bgShake)"/>
+  <!-- Cosmic background -->
+  <circle cx="50" cy="50" r="50" fill="url(#cosmicBgShake)"/>
+  <circle cx="50" cy="50" r="50" fill="url(#nebulaShake)"/>
+  <!-- Stars -->
+  <circle cx="14" cy="15" r="0.6" fill="#fff" opacity="0.7"/>
+  <circle cx="86" cy="18" r="0.5" fill="#9d4edd" opacity="0.8"/>
+  <circle cx="82" cy="80" r="0.7" fill="#4fc3f7" opacity="0.6"/>
+  <circle cx="18" cy="78" r="0.5" fill="#fff" opacity="0.5"/>
+  <circle cx="90" cy="50" r="0.4" fill="#ffd700" opacity="0.6"/>
+  <!-- Constellation line -->
+  <path d="M14 15 L28 28 M86 18 L75 30" stroke="#9d4edd" stroke-width="0.3" opacity="0.3"/>
   <!-- Balding head with hair on sides -->
   <ellipse cx="50" cy="42" rx="22" ry="24" fill="#e8d4c4"/>
   <!-- Hair on sides, bald on top -->
@@ -28,4 +43,3 @@
   <!-- Body -->
   <ellipse cx="50" cy="92" rx="22" ry="12" fill="#1a1a2a"/>
 </svg>
-

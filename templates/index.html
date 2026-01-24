@@ -3,38 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SeanceAI - Talk to History</title>
-    <meta name="description" content="Commune with the minds of history. Have AI-powered conversations with Einstein, Cleopatra, Da Vinci, and other legendary figures.">
-    
+    <title>SeanceAI - Enter the Cosmic Void</title>
+    <meta name="description" content="Enter the cosmic void and commune with the minds of history. Have AI-powered conversations with Einstein, Cleopatra, Da Vinci, and other legendary figures across time and space.">
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="SeanceAI - Talk to History">
-    <meta property="og:description" content="Commune with the minds of history. Have AI-powered conversations with Einstein, Cleopatra, Da Vinci, and other legendary figures.">
+    <meta property="og:title" content="SeanceAI - Enter the Cosmic Void">
+    <meta property="og:description" content="Enter the cosmic void and commune with the minds of history. Have AI-powered conversations with legendary figures across time and space.">
     <meta property="og:image" content="/static/images/og-preview.png">
-    
+
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="SeanceAI - Talk to History">
-    <meta name="twitter:description" content="Commune with the minds of history. Have AI-powered conversations with Einstein, Cleopatra, Da Vinci, and other legendary figures.">
+    <meta name="twitter:title" content="SeanceAI - Enter the Cosmic Void">
+    <meta name="twitter:description" content="Enter the cosmic void and commune with the minds of history. Have AI-powered conversations with legendary figures across time and space.">
     <meta name="twitter:image" content="/static/images/og-preview.png">
-    
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#050510">
+
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <!-- Atmospheric Effects -->
-    <div class="particles-container" aria-hidden="true">
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-    </div>
-    <div class="fog-layer" aria-hidden="true"></div>
+    <!-- Cosmic Background Effects -->
+    <div id="star-field" aria-hidden="true"></div>
+
+    <!-- Shooting Stars -->
+    <div class="shooting-star" aria-hidden="true"></div>
+    <div class="shooting-star" aria-hidden="true"></div>
+    <div class="shooting-star" aria-hidden="true"></div>
+
+    <!-- Constellation Canvas -->
+    <canvas id="constellation-canvas" aria-hidden="true"></canvas>
 
     <!-- Summoning Overlay -->
     <div id="summoning-overlay" class="summoning-overlay" aria-hidden="true">
@@ -90,18 +89,18 @@
         <!-- Figure Selection View -->
         <main id="selection-view" class="view active">
             <section class="intro-section">
-                <h2>Choose Your Historical Guide</h2>
-                <p>Select a figure from history to begin your conversation. Each spirit brings wisdom from their era.</p>
+                <h2>Choose Your Cosmic Guide</h2>
+                <p>Select a luminous soul from across the ages. Each celestial presence carries wisdom from their time in the stars.</p>
             </section>
 
             <!-- Search and Filter Controls -->
             <div class="filter-controls">
                 <div class="search-wrapper">
                     <span class="search-icon">🔍</span>
-                    <input 
-                        type="text" 
-                        id="search-input" 
-                        placeholder="Search by name..." 
+                    <input
+                        type="text"
+                        id="search-input"
+                        placeholder="Search the cosmos..."
                         autocomplete="off"
                     >
                 </div>
@@ -121,7 +120,7 @@
                 <!-- Figures will be dynamically loaded here -->
                 <div class="loading-spinner">
                     <div class="spinner"></div>
-                    <p>Summoning the spirits...</p>
+                    <p>Opening the cosmic portal...</p>
                 </div>
             </div>
         </main>
@@ -129,13 +128,13 @@
         <!-- Dinner Party Selection View -->
         <main id="dinner-party-view" class="view">
             <section class="intro-section">
-                <h2>Host a Dinner Party</h2>
-                <p>Invite 2-5 historical figures to discuss, debate, and dine together. Select your guests below.</p>
+                <h2>Host a Celestial Gathering</h2>
+                <p>Invite 2-5 luminaries from across time to converse among the stars. Select your celestial guests below.</p>
             </section>
 
             <!-- Curated Combos -->
             <div class="curated-combos">
-                <p class="combos-label">Quick Selections:</p>
+                <p class="combos-label">Cosmic Constellations:</p>
                 <div id="combo-buttons" class="combo-buttons">
                     <!-- Combo buttons will be dynamically loaded here -->
                 </div>
@@ -151,17 +150,17 @@
                 <!-- Figures will be dynamically loaded here -->
                 <div class="loading-spinner">
                     <div class="spinner"></div>
-                    <p>Preparing the guest list...</p>
+                    <p>Scanning the celestial registry...</p>
                 </div>
             </div>
 
             <!-- Start Party Button -->
             <div class="start-party-container">
                 <button id="start-party-btn" class="start-party-btn" disabled>
-                    <span class="party-icon">🍷</span>
-                    <span>Start Dinner Party</span>
+                    <span class="party-icon">✨</span>
+                    <span>Begin Celestial Gathering</span>
                 </button>
-                <p class="party-hint">Select 2-5 guests to begin</p>
+                <p class="party-hint">Select 2-5 luminaries to begin</p>
             </div>
         </main>
 
@@ -202,7 +201,7 @@
                         <span></span>
                         <span></span>
                     </div>
-                    <span class="typing-text">The guests are contemplating...</span>
+                    <span class="typing-text">The cosmic council convenes...</span>
                 </div>
             </div>
 
@@ -274,12 +273,12 @@
                         <span></span>
                         <span></span>
                     </div>
-                    <span class="typing-text">The spirit is contemplating...</span>
+                    <span class="typing-text">Channeling through the cosmos...</span>
                 </div>
             </div>
 
             <div id="starter-questions" class="starter-questions">
-                <p class="starter-label">Begin your seance with a question:</p>
+                <p class="starter-label">Begin your cosmic journey with a question:</p>
                 <div id="question-buttons" class="question-buttons">
                     <!-- Starter questions will be loaded here -->
                 </div>
@@ -287,10 +286,10 @@
 
             <form id="chat-form" class="chat-form">
                 <div class="input-wrapper">
-                    <input 
-                        type="text" 
-                        id="message-input" 
-                        placeholder="Speak to the spirit..." 
+                    <input
+                        type="text"
+                        id="message-input"
+                        placeholder="Send your message across the void..."
                         autocomplete="off"
                         maxlength="1000"
                     >
@@ -303,7 +302,7 @@
 
         <!-- Footer -->
         <footer class="main-footer">
-            <p>SeanceAI &middot; Powered by AI &middot; For educational entertainment only</p>
+            <p>SeanceAI &middot; Traversing the Cosmic Void &middot; For educational entertainment only</p>
             <p class="credit">Created by <a href="https://github.com/ARJUNVARMA2000" target="_blank" rel="noopener noreferrer">Arjun Varma</a></p>
         </footer>
     </div>

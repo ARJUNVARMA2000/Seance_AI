@@ -1,11 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
-    <linearGradient id="bgTesla" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#1a2a3a"/>
-      <stop offset="100%" style="stop-color:#0d1520"/>
-    </linearGradient>
+    <radialGradient id="cosmicBgTesla" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" style="stop-color:#1a1a4a"/>
+      <stop offset="50%" style="stop-color:#0d0d20"/>
+      <stop offset="100%" style="stop-color:#050510"/>
+    </radialGradient>
+    <radialGradient id="nebulaTesla" cx="50%" cy="30%" r="60%">
+      <stop offset="0%" style="stop-color:#00ffff;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#00ffff;stop-opacity:0"/>
+    </radialGradient>
   </defs>
-  <circle cx="50" cy="50" r="50" fill="url(#bgTesla)"/>
+  <!-- Cosmic background -->
+  <circle cx="50" cy="50" r="50" fill="url(#cosmicBgTesla)"/>
+  <circle cx="50" cy="50" r="50" fill="url(#nebulaTesla)"/>
+  <!-- Stars -->
+  <circle cx="12" cy="18" r="0.6" fill="#00ffff" opacity="0.9"/>
+  <circle cx="88" cy="15" r="0.5" fill="#fff" opacity="0.7"/>
+  <circle cx="85" cy="78" r="0.7" fill="#4fc3f7" opacity="0.6"/>
+  <circle cx="15" cy="82" r="0.5" fill="#fff" opacity="0.5"/>
+  <circle cx="8" cy="48" r="0.4" fill="#00ffff" opacity="0.7"/>
+  <!-- Electric constellation line -->
+  <path d="M12 18 L25 30 M88 15 L75 28" stroke="#00ffff" stroke-width="0.4" opacity="0.35"/>
   <!-- Electric glow effect -->
   <circle cx="50" cy="50" r="48" fill="none" stroke="#4a90d9" stroke-width="1" opacity="0.3"/>
   <!-- Slicked back dark hair -->
@@ -28,4 +43,3 @@
   <rect x="46" y="72" width="8" height="18" fill="#ffffff"/>
   <circle cx="50" cy="76" r="2" fill="#1a1a1a"/>
 </svg>
-

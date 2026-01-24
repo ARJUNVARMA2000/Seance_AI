@@ -1,11 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
-    <linearGradient id="bgCurie" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#2e3a4a"/>
-      <stop offset="100%" style="stop-color:#1a2530"/>
-    </linearGradient>
+    <radialGradient id="cosmicBgCurie" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" style="stop-color:#1a1a4a"/>
+      <stop offset="50%" style="stop-color:#0d0d20"/>
+      <stop offset="100%" style="stop-color:#050510"/>
+    </radialGradient>
+    <radialGradient id="nebulaCurie" cx="35%" cy="35%" r="55%">
+      <stop offset="0%" style="stop-color:#00ff88;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#00ff88;stop-opacity:0"/>
+    </radialGradient>
   </defs>
-  <circle cx="50" cy="50" r="50" fill="url(#bgCurie)"/>
+  <!-- Cosmic background -->
+  <circle cx="50" cy="50" r="50" fill="url(#cosmicBgCurie)"/>
+  <circle cx="50" cy="50" r="50" fill="url(#nebulaCurie)"/>
+  <!-- Stars (radioactive glow effect) -->
+  <circle cx="12" cy="15" r="0.6" fill="#00ff88" opacity="0.8"/>
+  <circle cx="88" cy="18" r="0.5" fill="#fff" opacity="0.6"/>
+  <circle cx="82" cy="80" r="0.7" fill="#4fc3f7" opacity="0.7"/>
+  <circle cx="18" cy="78" r="0.5" fill="#00ff88" opacity="0.6"/>
+  <circle cx="8" cy="50" r="0.4" fill="#fff" opacity="0.5"/>
+  <!-- Constellation line -->
+  <path d="M12 15 L28 28 M88 18 L75 32" stroke="#00ff88" stroke-width="0.3" opacity="0.3"/>
   <!-- Hair up in bun -->
   <ellipse cx="50" cy="20" rx="15" ry="12" fill="#4a3a2a"/>
   <ellipse cx="50" cy="35" rx="22" ry="18" fill="#4a3a2a"/>
@@ -26,4 +41,3 @@
   <rect x="42" y="68" width="16" height="12" fill="#2a2a3a"/>
   <rect x="44" y="68" width="12" height="8" fill="#eee8d5"/>
 </svg>
-

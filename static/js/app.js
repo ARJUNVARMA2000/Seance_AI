@@ -92,14 +92,197 @@ document.addEventListener('DOMContentLoaded', init);
 
 async function init() {
     initTheme();
+    initCosmicEffects();
     loadSavedConversations();
     await Promise.all([loadFigures(), loadModels(), loadCuratedCombos()]);
     setupEventListeners();
     renderGuestGrid();
     renderPartyModelSelector();
-    
+
     // Check for shared conversation link
     handleShareLink();
+}
+
+// ===== COSMIC EFFECTS =====
+
+// Initialize all cosmic background effects
+function initCosmicEffects() {
+    generateStarField();
+    initConstellationCanvas();
+}
+
+// Generate dynamic star field
+function generateStarField() {
+    const starField = document.getElementById('star-field');
+    if (!starField) return;
+
+    const starCount = 200;
+    const colors = [
+        '#ffffff',
+        '#f0f0ff',
+        '#e8e8ff',
+        '#4fc3f7',
+        '#b3e5fc'
+    ];
+
+    for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+
+        // Random position
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+
+        // Random size (1-3px)
+        const size = Math.random() * 2 + 1;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+
+        // Random color
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        star.style.backgroundColor = color;
+        star.style.boxShadow = `0 0 ${size * 2}px ${color}`;
+
+        // Random twinkle animation
+        const duration = Math.random() * 3 + 2;
+        const delay = Math.random() * 5;
+        const opacity = Math.random() * 0.5 + 0.3;
+
+        star.style.setProperty('--twinkle-duration', `${duration}s`);
+        star.style.setProperty('--twinkle-delay', `${delay}s`);
+        star.style.setProperty('--star-opacity', opacity);
+
+        starField.appendChild(star);
+    }
+}
+
+// Initialize constellation canvas for interactive connections
+function initConstellationCanvas() {
+    const canvas = document.getElementById('constellation-canvas');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    let animationId;
+    let mouseX = 0;
+    let mouseY = 0;
+    let isMouseInCanvas = false;
+
+    // Resize canvas to full window
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Track mouse position
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+
+    document.addEventListener('mouseenter', () => {
+        isMouseInCanvas = true;
+    });
+
+    document.addEventListener('mouseleave', () => {
+        isMouseInCanvas = false;
+    });
+
+    // Create wandering constellation points
+    const points = [];
+    const pointCount = 30;
+
+    for (let i = 0; i < pointCount; i++) {
+        points.push({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            vx: (Math.random() - 0.5) * 0.3,
+            vy: (Math.random() - 0.5) * 0.3,
+            radius: Math.random() * 1.5 + 0.5
+        });
+    }
+
+    // Animation loop
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Update and draw points
+        points.forEach(point => {
+            // Update position
+            point.x += point.vx;
+            point.y += point.vy;
+
+            // Bounce off edges
+            if (point.x < 0 || point.x > canvas.width) point.vx *= -1;
+            if (point.y < 0 || point.y > canvas.height) point.vy *= -1;
+
+            // Draw point
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, point.radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(79, 195, 247, 0.5)';
+            ctx.fill();
+        });
+
+        // Draw connections between nearby points
+        const connectionDistance = 150;
+
+        for (let i = 0; i < points.length; i++) {
+            for (let j = i + 1; j < points.length; j++) {
+                const dx = points[i].x - points[j].x;
+                const dy = points[i].y - points[j].y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < connectionDistance) {
+                    const opacity = (1 - distance / connectionDistance) * 0.2;
+                    ctx.beginPath();
+                    ctx.moveTo(points[i].x, points[i].y);
+                    ctx.lineTo(points[j].x, points[j].y);
+                    ctx.strokeStyle = `rgba(123, 44, 191, ${opacity})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // Draw connections to mouse when near points
+        if (isMouseInCanvas) {
+            points.forEach(point => {
+                const dx = mouseX - point.x;
+                const dy = mouseY - point.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < 200) {
+                    const opacity = (1 - distance / 200) * 0.4;
+                    ctx.beginPath();
+                    ctx.moveTo(point.x, point.y);
+                    ctx.lineTo(mouseX, mouseY);
+                    ctx.strokeStyle = `rgba(255, 215, 0, ${opacity})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+            });
+        }
+
+        animationId = requestAnimationFrame(animate);
+    }
+
+    // Start animation
+    animate();
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        cancelAnimationFrame(animationId);
+    });
+}
+
+// Add glowing aura effect to new messages
+function addNewMessageAura(messageElement) {
+    messageElement.classList.add('new-message');
+    setTimeout(() => {
+        messageElement.classList.remove('new-message');
+    }, 1000);
 }
 
 // Handle shared conversation links
@@ -381,7 +564,7 @@ async function selectFigure(figure) {
     renderBranchSelector();
 
     // Add welcome message (no suggestions - starter questions are shown separately)
-    addMessage('figure', `*The spirit of ${figure.name} materializes before you*\n\nGreetings, traveler through time. I am ${figure.name}, ${figure.title}. What wisdom do you seek from my era?`, false);
+    addMessage('figure', `*${figure.name} emerges from the cosmic void, starlight swirling around their form*\n\nGreetings, voyager across the infinite. I am ${figure.name}, ${figure.title}. The stars have aligned to bridge our realms. What knowledge do you seek from beyond the veil of time?`, false);
 
     elements.messageInput.focus();
 }
@@ -2806,7 +2989,7 @@ function initSummoningElements() {
     summoningElements.portrait = document.getElementById('summoning-portrait');
 }
 
-// Play summoning animation
+// Play cosmic portal summoning animation
 function playSummoningAnimation(figure) {
     return new Promise((resolve) => {
         if (!summoningElements.overlay) {
@@ -2825,13 +3008,13 @@ function playSummoningAnimation(figure) {
             portraitImg.onerror = () => { portraitImg.src = '/static/images/figures/default.svg'; };
         }
 
-        // Add candle flicker effect to body
-        document.body.classList.add('candle-flicker');
+        // Add cosmic summoning effect to body
+        document.body.classList.add('cosmic-summoning');
 
         // Show overlay
         summoningElements.overlay.classList.add('active');
 
-        // Reset ring animations
+        // Reset ring animations for cosmic portal effect
         const rings = summoningElements.overlay.querySelectorAll('.summoning-ring');
         rings.forEach(ring => {
             ring.style.animation = 'none';
@@ -2846,22 +3029,12 @@ function playSummoningAnimation(figure) {
             summoningElements.portrait.style.animation = null;
         }
 
-        // Hide after animation
+        // Hide after cosmic portal animation
         setTimeout(() => {
             summoningElements.overlay.classList.remove('active');
-            document.body.classList.remove('candle-flicker');
+            document.body.classList.remove('cosmic-summoning');
             resolve();
-        }, 1500);
+        }, 1800);
     });
-}
-
-// Add new-message class for aura effect
-function addNewMessageAura(messageElement) {
-    if (messageElement && messageElement.classList.contains('figure-message')) {
-        messageElement.classList.add('new-message');
-        setTimeout(() => {
-            messageElement.classList.remove('new-message');
-        }, 2000);
-    }
 }
 

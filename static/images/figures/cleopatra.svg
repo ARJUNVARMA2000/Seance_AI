@@ -1,11 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
   <defs>
-    <linearGradient id="bgCleo" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#3d2e1a"/>
-      <stop offset="100%" style="stop-color:#1a1408"/>
-    </linearGradient>
+    <radialGradient id="cosmicBgCleo" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" style="stop-color:#1a1a4a"/>
+      <stop offset="50%" style="stop-color:#0d0d20"/>
+      <stop offset="100%" style="stop-color:#050510"/>
+    </radialGradient>
+    <radialGradient id="nebulaCleo" cx="70%" cy="30%" r="50%">
+      <stop offset="0%" style="stop-color:#d4af37;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#d4af37;stop-opacity:0"/>
+    </radialGradient>
   </defs>
-  <circle cx="50" cy="50" r="50" fill="url(#bgCleo)"/>
+  <!-- Cosmic background -->
+  <circle cx="50" cy="50" r="50" fill="url(#cosmicBgCleo)"/>
+  <circle cx="50" cy="50" r="50" fill="url(#nebulaCleo)"/>
+  <!-- Stars -->
+  <circle cx="12" cy="18" r="0.7" fill="#ffd700" opacity="0.8"/>
+  <circle cx="88" cy="22" r="0.5" fill="#fff" opacity="0.6"/>
+  <circle cx="82" cy="78" r="0.6" fill="#4fc3f7" opacity="0.7"/>
+  <circle cx="18" cy="82" r="0.5" fill="#fff" opacity="0.5"/>
+  <circle cx="8" cy="45" r="0.4" fill="#ffd700" opacity="0.6"/>
+  <!-- Constellation line -->
+  <path d="M12 18 L20 30 M88 22 L80 35" stroke="#d4af37" stroke-width="0.3" opacity="0.25"/>
   <!-- Egyptian headdress -->
   <path d="M25 55 L50 15 L75 55 L70 60 L50 35 L30 60 Z" fill="#d4af37"/>
   <rect x="35" y="15" width="30" height="8" fill="#d4af37"/>
@@ -25,4 +40,3 @@
   <ellipse cx="50" cy="78" rx="25" ry="12" fill="#d4af37"/>
   <ellipse cx="50" cy="78" rx="20" ry="8" fill="#1a5040"/>
 </svg>
-
