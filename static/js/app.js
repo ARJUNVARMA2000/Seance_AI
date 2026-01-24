@@ -414,49 +414,49 @@ async function loadModels() {
 function renderModelSelector() {
     const selector = elements.modelSelector;
     selector.innerHTML = '';
-    
+
     // Group models by tier
-    const freeModels = state.models.filter(m => m.tier === 'free');
-    const cheapModels = state.models.filter(m => m.tier === 'cheap');
-    const premiumModels = state.models.filter(m => m.tier === 'premium');
-    
-    if (freeModels.length > 0) {
-        const freeGroup = document.createElement('optgroup');
-        freeGroup.label = '✨ Free Models';
-        freeModels.forEach(model => {
+    const swiftModels = state.models.filter(m => m.tier === 'swift');
+    const balancedModels = state.models.filter(m => m.tier === 'balanced');
+    const advancedModels = state.models.filter(m => m.tier === 'advanced');
+
+    if (swiftModels.length > 0) {
+        const swiftGroup = document.createElement('optgroup');
+        swiftGroup.label = '⚡ Swift';
+        swiftModels.forEach(model => {
             const option = document.createElement('option');
             option.value = model.id;
             option.textContent = model.name;
             option.selected = model.id === state.selectedModel;
-            freeGroup.appendChild(option);
+            swiftGroup.appendChild(option);
         });
-        selector.appendChild(freeGroup);
+        selector.appendChild(swiftGroup);
     }
-    
-    if (cheapModels.length > 0) {
-        const cheapGroup = document.createElement('optgroup');
-        cheapGroup.label = '💰 Affordable';
-        cheapModels.forEach(model => {
+
+    if (balancedModels.length > 0) {
+        const balancedGroup = document.createElement('optgroup');
+        balancedGroup.label = '⚖️ Balanced';
+        balancedModels.forEach(model => {
             const option = document.createElement('option');
             option.value = model.id;
             option.textContent = model.name;
             option.selected = model.id === state.selectedModel;
-            cheapGroup.appendChild(option);
+            balancedGroup.appendChild(option);
         });
-        selector.appendChild(cheapGroup);
+        selector.appendChild(balancedGroup);
     }
-    
-    if (premiumModels.length > 0) {
-        const premiumGroup = document.createElement('optgroup');
-        premiumGroup.label = '👑 Premium';
-        premiumModels.forEach(model => {
+
+    if (advancedModels.length > 0) {
+        const advancedGroup = document.createElement('optgroup');
+        advancedGroup.label = '🌟 Advanced';
+        advancedModels.forEach(model => {
             const option = document.createElement('option');
             option.value = model.id;
             option.textContent = model.name;
             option.selected = model.id === state.selectedModel;
-            premiumGroup.appendChild(option);
+            advancedGroup.appendChild(option);
         });
-        selector.appendChild(premiumGroup);
+        selector.appendChild(advancedGroup);
     }
 }
 
@@ -1731,51 +1731,51 @@ function renderPartyGuestsInfo() {
 
 function renderPartyModelSelector() {
     if (!elements.partyModelSelector) return;
-    
+
     elements.partyModelSelector.innerHTML = '';
-    
+
     // Group models by tier
-    const freeModels = state.models.filter(m => m.tier === 'free');
-    const cheapModels = state.models.filter(m => m.tier === 'cheap');
-    const premiumModels = state.models.filter(m => m.tier === 'premium');
-    
-    if (freeModels.length > 0) {
-        const freeGroup = document.createElement('optgroup');
-        freeGroup.label = '✨ Free Models';
-        freeModels.forEach(model => {
+    const swiftModels = state.models.filter(m => m.tier === 'swift');
+    const balancedModels = state.models.filter(m => m.tier === 'balanced');
+    const advancedModels = state.models.filter(m => m.tier === 'advanced');
+
+    if (swiftModels.length > 0) {
+        const swiftGroup = document.createElement('optgroup');
+        swiftGroup.label = '⚡ Swift';
+        swiftModels.forEach(model => {
             const option = document.createElement('option');
             option.value = model.id;
             option.textContent = model.name;
             option.selected = model.id === state.selectedModel;
-            freeGroup.appendChild(option);
+            swiftGroup.appendChild(option);
         });
-        elements.partyModelSelector.appendChild(freeGroup);
+        elements.partyModelSelector.appendChild(swiftGroup);
     }
-    
-    if (cheapModels.length > 0) {
-        const cheapGroup = document.createElement('optgroup');
-        cheapGroup.label = '💰 Affordable';
-        cheapModels.forEach(model => {
+
+    if (balancedModels.length > 0) {
+        const balancedGroup = document.createElement('optgroup');
+        balancedGroup.label = '⚖️ Balanced';
+        balancedModels.forEach(model => {
             const option = document.createElement('option');
             option.value = model.id;
             option.textContent = model.name;
             option.selected = model.id === state.selectedModel;
-            cheapGroup.appendChild(option);
+            balancedGroup.appendChild(option);
         });
-        elements.partyModelSelector.appendChild(cheapGroup);
+        elements.partyModelSelector.appendChild(balancedGroup);
     }
-    
-    if (premiumModels.length > 0) {
-        const premiumGroup = document.createElement('optgroup');
-        premiumGroup.label = '👑 Premium';
-        premiumModels.forEach(model => {
+
+    if (advancedModels.length > 0) {
+        const advancedGroup = document.createElement('optgroup');
+        advancedGroup.label = '🌟 Advanced';
+        advancedModels.forEach(model => {
             const option = document.createElement('option');
             option.value = model.id;
             option.textContent = model.name;
             option.selected = model.id === state.selectedModel;
-            premiumGroup.appendChild(option);
+            advancedGroup.appendChild(option);
         });
-        elements.partyModelSelector.appendChild(premiumGroup);
+        elements.partyModelSelector.appendChild(advancedGroup);
     }
 }
 

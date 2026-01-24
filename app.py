@@ -42,21 +42,24 @@ FALLBACK_MODELS = [
     "deepseek/deepseek-r1:free",
 ]
 
-# Available models - mix of free and premium
+# Available models - organized by capability tier
 AVAILABLE_MODELS = [
-    {"id": "google/gemini-2.0-flash-exp:free", "name": "Gemini 2.0 Flash (Free)", "tier": "free"},
-    {"id": "meta-llama/llama-3.3-70b-instruct:free", "name": "Llama 3.3 70B (Free)", "tier": "free"},
-    {"id": "deepseek/deepseek-r1:free", "name": "DeepSeek R1 (Free)", "tier": "free"},
-    {"id": "qwen/qwen-2.5-72b-instruct:free", "name": "Qwen 2.5 72B (Free)", "tier": "free"},
-    {"id": "mistralai/mistral-small-3.1-24b-instruct:free", "name": "Mistral Small 3.1 (Free)", "tier": "free"},
-    {"id": "google/gemini-2.0-flash-001", "name": "Gemini 2.0 Flash", "tier": "cheap"},
-    {"id": "openai/gpt-4o-mini", "name": "GPT-4o Mini", "tier": "cheap"},
-    {"id": "anthropic/claude-3.5-haiku", "name": "Claude 3.5 Haiku", "tier": "cheap"},
-    {"id": "deepseek/deepseek-chat", "name": "DeepSeek V3", "tier": "cheap"},
-    {"id": "anthropic/claude-sonnet-4", "name": "Claude Sonnet 4", "tier": "premium"},
-    {"id": "openai/gpt-4o", "name": "GPT-4o", "tier": "premium"},
-    {"id": "google/gemini-2.5-pro-preview", "name": "Gemini 2.5 Pro", "tier": "premium"},
-    {"id": "anthropic/claude-opus-4", "name": "Claude Opus 4", "tier": "premium"},
+    # Swift tier - fast and responsive
+    {"id": "google/gemini-2.0-flash-exp:free", "name": "Gemini 2.0 Flash", "tier": "swift"},
+    {"id": "meta-llama/llama-3.3-70b-instruct:free", "name": "Llama 3.3 70B", "tier": "swift"},
+    {"id": "deepseek/deepseek-r1:free", "name": "DeepSeek R1", "tier": "swift"},
+    {"id": "qwen/qwen-2.5-72b-instruct:free", "name": "Qwen 2.5 72B", "tier": "swift"},
+    {"id": "mistralai/mistral-small-3.1-24b-instruct:free", "name": "Mistral Small 3.1", "tier": "swift"},
+    # Balanced tier - good mix of speed and capability
+    {"id": "google/gemini-2.0-flash-001", "name": "Gemini 2.0 Flash Pro", "tier": "balanced"},
+    {"id": "openai/gpt-4o-mini", "name": "GPT-4o Mini", "tier": "balanced"},
+    {"id": "anthropic/claude-3.5-haiku", "name": "Claude 3.5 Haiku", "tier": "balanced"},
+    {"id": "deepseek/deepseek-chat", "name": "DeepSeek V3", "tier": "balanced"},
+    # Advanced tier - most capable models
+    {"id": "anthropic/claude-sonnet-4", "name": "Claude Sonnet 4", "tier": "advanced"},
+    {"id": "openai/gpt-4o", "name": "GPT-4o", "tier": "advanced"},
+    {"id": "google/gemini-2.5-pro-preview", "name": "Gemini 2.5 Pro", "tier": "advanced"},
+    {"id": "anthropic/claude-opus-4", "name": "Claude Opus 4", "tier": "advanced"},
 ]
 
 
