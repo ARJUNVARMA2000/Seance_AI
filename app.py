@@ -27,7 +27,7 @@ app = Flask(__name__)
 # Configuration
 OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY')
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-DEFAULT_MODEL = "google/gemini-2.0-flash-exp:free"
+DEFAULT_MODEL = "google/gemma-3-12b-it:free"
 MAX_HISTORY = 20  # Maximum number of messages to keep in history
 
 # Rate limit handling configuration
@@ -36,22 +36,24 @@ RETRY_DELAYS = [2, 5, 10]  # Exponential backoff delays in seconds
 
 # Fallback models when primary model is rate-limited (in order of preference)
 FALLBACK_MODELS = [
+    "google/gemma-3-27b-it:free",
+    "google/gemma-3-4b-it:free",
     "meta-llama/llama-3.3-70b-instruct:free",
-    "qwen/qwen-2.5-72b-instruct:free",
-    "mistralai/mistral-small-3.1-24b-instruct:free",
-    "deepseek/deepseek-r1:free",
+    "meta-llama/llama-3.1-405b-instruct:free",
 ]
+
+# Models that don't support the 'system' role and need it merged into user messages
+MODELS_WITHOUT_SYSTEM_ROLE = {"google/"}
 
 # Available models - organized by capability tier
 AVAILABLE_MODELS = [
-    # Swift tier - fast and responsive
-    {"id": "google/gemini-2.0-flash-exp:free", "name": "Gemini 2.0 Flash", "tier": "swift"},
+    # Swift tier - fast and responsive (free models)
+    {"id": "google/gemma-3-12b-it:free", "name": "Gemma 3 12B", "tier": "swift"},
+    {"id": "google/gemma-3-27b-it:free", "name": "Gemma 3 27B", "tier": "swift"},
+    {"id": "google/gemma-3-4b-it:free", "name": "Gemma 3 4B", "tier": "swift"},
     {"id": "meta-llama/llama-3.3-70b-instruct:free", "name": "Llama 3.3 70B", "tier": "swift"},
-    {"id": "deepseek/deepseek-r1:free", "name": "DeepSeek R1", "tier": "swift"},
-    {"id": "qwen/qwen-2.5-72b-instruct:free", "name": "Qwen 2.5 72B", "tier": "swift"},
-    {"id": "mistralai/mistral-small-3.1-24b-instruct:free", "name": "Mistral Small 3.1", "tier": "swift"},
+    {"id": "meta-llama/llama-3.1-405b-instruct:free", "name": "Llama 3.1 405B", "tier": "swift"},
     # Balanced tier - good mix of speed and capability
-    {"id": "google/gemini-2.0-flash-001", "name": "Gemini 2.0 Flash Pro", "tier": "balanced"},
     {"id": "openai/gpt-4o-mini", "name": "GPT-4o Mini", "tier": "balanced"},
     {"id": "anthropic/claude-3.5-haiku", "name": "Claude 3.5 Haiku", "tier": "balanced"},
     {"id": "deepseek/deepseek-chat", "name": "DeepSeek V3", "tier": "balanced"},
@@ -63,6 +65,31 @@ AVAILABLE_MODELS = [
 ]
 
 
+def _convert_system_messages(messages: list, model: str) -> list:
+    """
+    Convert system role messages to user messages for models that don't support the system role.
+    Merges the system prompt into the first user message.
+    """
+    needs_conversion = any(model.startswith(prefix) for prefix in MODELS_WITHOUT_SYSTEM_ROLE)
+    if not needs_conversion:
+        return messages
+
+    converted = []
+    system_content = ""
+    for msg in messages:
+        if msg["role"] == "system":
+            system_content += msg["content"] + "\n"
+        elif msg["role"] == "user" and system_content:
+            converted.append({
+                "role": "user",
+                "content": f"[Instructions: {system_content.strip()}]\n\n{msg['content']}"
+            })
+            system_content = ""
+        else:
+            converted.append(msg)
+    return converted
+
+
 def _make_api_request(messages: list, model: str, timeout: int = 30, stream: bool = False):
     """
     Make a single API request to OpenRouter.
@@ -70,6 +97,7 @@ def _make_api_request(messages: list, model: str, timeout: int = 30, stream: boo
     error_info is None on success, or a dict with 'status_code', 'is_rate_limit', 'message'.
     """
     try:
+        api_messages = _convert_system_messages(messages, model)
         response = requests.post(
             OPENROUTER_URL,
             headers={
@@ -80,7 +108,7 @@ def _make_api_request(messages: list, model: str, timeout: int = 30, stream: boo
             },
             json={
                 "model": model,
-                "messages": messages,
+                "messages": api_messages,
                 "max_tokens": 500,
                 "temperature": 0.8,
                 **({"stream": True} if stream else {})
@@ -141,7 +169,7 @@ def call_llm_suggestions(messages: list, model: str = None) -> Tuple[str, bool]:
     if not OPENROUTER_API_KEY:
         return ("", True)
     
-    selected_model = model or "meta-llama/llama-3.3-70b-instruct:free"
+    selected_model = model or "google/gemma-3-12b-it:free"
     
     try:
         response = requests.post(
