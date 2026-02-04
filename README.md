@@ -193,6 +193,19 @@ curl -X POST http://localhost:5000/api/chat \
 4. Add environment variable: `OPENROUTER_API_KEY`
 5. Deploy! Railway will automatically detect the Flask app
 
+**Keeping the app awake (for recruiters / portfolio)**  
+On Railway’s Hobby (free) tier, services **sleep after ~5 minutes of no traffic**. When someone visits, the app wakes up (cold start can take 30s–2min), which can look like the site is down.
+
+To keep it always responsive:
+
+- **Option A – Free: use an uptime ping service**  
+  Ping your app every 5–10 minutes so Railway never treats it as idle. Use your **health endpoint** (lightweight, no side effects):
+  - **URL to ping:** `https://seance-ai.up.railway.app/api/health`
+  - **Services:** [UptimeRobot](https://uptimerobot.com) (free, 5-min checks), [cron-job.org](https://cron-job.org), or [Better Uptime](https://betteruptime.com). Create a monitor that GETs that URL every 5–10 minutes.
+
+- **Option B – Paid:**  
+  Upgrade to a Railway plan that keeps the service running (no sleep). Check [Railway pricing](https://railway.app/pricing) for always-on options.
+
 ### Fly.io
 
 1. Install the [Fly CLI](https://fly.io/docs/getting-started/installing-flyctl/)
