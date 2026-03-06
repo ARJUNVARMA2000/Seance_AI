@@ -3,7 +3,16 @@
 > **Step into a digital séance and converse with the greatest minds humanity has ever known.** From Einstein's thought experiments to Cleopatra's political wisdom, from da Vinci's boundless curiosity to Lincoln's moral clarity—experience history through authentic, AI-powered conversations.
 
 [![Live Demo](https://img.shields.io/badge/🚀-Try%20Live%20Demo-blue?style=for-the-badge)](https://seance-ai.up.railway.app)
+[![Documentation](https://img.shields.io/badge/docs-Mintlify-1abc9c?style=for-the-badge)](https://arjunvarma2000-seance_ai-37.mintlify.app/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge)](LICENSE)
+
+---
+
+## Documentation
+
+Full documentation is available at [arjunvarma2000-seance_ai-37.mintlify.app](https://arjunvarma2000-seance_ai-37.mintlify.app/).
+
+Use the Mintlify docs for detailed guides, onboarding, and reference material. This README stays focused on the product overview, local setup, and deployment notes.
 
 ---
 
@@ -154,6 +163,8 @@ Navigate to `http://localhost:5000` and start conversing with history!
 ---
 
 ## 📖 API Documentation
+
+For full documentation, examples, and future updates, see the hosted docs at [arjunvarma2000-seance_ai-37.mintlify.app](https://arjunvarma2000-seance_ai-37.mintlify.app/).
 
 ### Endpoints
 
