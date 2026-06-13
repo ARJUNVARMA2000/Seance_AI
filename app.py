@@ -27,19 +27,18 @@ app = Flask(__name__)
 # Configuration
 OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY')
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-DEFAULT_MODEL = "google/gemma-3-12b-it:free"
+DEFAULT_MODEL = "openai/gpt-4o-mini"
 MAX_HISTORY = 20  # Maximum number of messages to keep in history
 
 # Rate limit handling configuration
 MAX_RETRIES = 3
 RETRY_DELAYS = [2, 5, 10]  # Exponential backoff delays in seconds
 
-# Fallback models when primary model is rate-limited (in order of preference)
+# Fallback models tried (in order) when the primary model fails — rate-limited,
+# unavailable, or returns no content. The chain ends with a reliable paid model so
+# chat never hard-fails, even when OpenRouter's free tier is down or rate-limited.
 FALLBACK_MODELS = [
-    "google/gemma-3-27b-it:free",
-    "google/gemma-3-4b-it:free",
-    "meta-llama/llama-3.3-70b-instruct:free",
-    "meta-llama/llama-3.1-405b-instruct:free",
+    "openai/gpt-4o-mini",  # Cheap, reliable paid model — final safety net
 ]
 
 # Models that don't support the 'system' role and need it merged into user messages
@@ -141,13 +140,15 @@ def _make_api_request(messages: list, model: str, timeout: int = 30, stream: boo
             'message': 'Request timed out'
         }
     except requests.exceptions.HTTPError as e:
-        status_code = e.response.status_code if e.response else None
+        # NOTE: use `is not None` — a Response is falsy for any 4xx/5xx status
+        # (Response.__bool__ returns .ok), which would otherwise drop the status/body.
+        status_code = e.response.status_code if e.response is not None else None
         error_msg = str(e)
         try:
-            if e.response:
+            if e.response is not None:
                 error_data = e.response.json()
                 error_msg = error_data.get('error', {}).get('message', str(e))
-        except:
+        except (ValueError, KeyError):
             pass
         return None, {
             'status_code': status_code,
@@ -257,8 +258,11 @@ def call_llm(messages: list, model: str = None) -> Tuple[str, bool]:
                     app.logger.info(f"Max retries reached for {current_model}, trying next model...")
                     break
             else:
-                # Non-rate-limit error, don't retry
-                app.logger.error(f"API error: {error_info['message']}")
+                # Non-rate-limit error, don't retry this model — fall through to next
+                app.logger.error(
+                    f"API error from {current_model}: "
+                    f"HTTP {error_info.get('status_code')} - {error_info['message']}"
+                )
                 break
     
     # All models and retries exhausted
@@ -352,8 +356,11 @@ def stream_llm(messages: list, model: str = None):
                         app.logger.info(f"Max retries reached for {current_model}, trying next model...")
                         break
                 else:
-                    # Non-rate-limit error, don't retry
-                    app.logger.error(f"Streaming API error: {error_info['message']}")
+                    # Non-rate-limit error, don't retry this model — fall through to next
+                    app.logger.error(
+                        f"Streaming API error from {current_model}: "
+                        f"HTTP {error_info.get('status_code')} - {error_info['message']}"
+                    )
                     break
     
     # All models and retries exhausted - yield error
