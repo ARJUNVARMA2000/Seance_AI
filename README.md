@@ -1,6 +1,6 @@
 # SeanceAI
 
-Converse with 60+ historical figures. Authentic era-appropriate personas, streaming responses, and a Dinner Party mode where multiple figures debate each other.
+Enter curated interpretive salons with 57 historical-figure personas, streaming responses, and visible temporal knowledge boundaries. Every generated conversation is labeled as interpretation rather than quotation or historical record.
 
 - **Live demo:** https://seance-ai.up.railway.app
 - **Portfolio:** https://arjun-varma.com/
@@ -9,7 +9,7 @@ Converse with 60+ historical figures. Authentic era-appropriate personas, stream
 
 History education often feels distant and abstract. Students read about historical figures in textbooks but rarely get to experience their personalities, perspectives, or thought processes. Traditional learning methods don't capture authentic voices or contextual knowledge.
 
-The goal: an immersive educational experience that brings history to life through AI-powered conversations with legendary figures from different eras.
+The goal: a source-conscious educational experience that makes historical viewpoints, disagreement, and temporal limits legible through generated interpretive conversations.
 
 ## Challenge
 
@@ -22,10 +22,10 @@ The goal: an immersive educational experience that brings history to life throug
 
 ## Approach
 
-1. **Historical research** — documented sources drive authentic personalities, speaking styles, and knowledge boundaries for 60+ figures
+1. **Curatorial framework** — persona notes, knowledge boundaries, and interpretive limitations are visible; verified source lists are still pending repository-owner review
 2. **Dual conversation modes** — Seance Mode (1-on-1) and Dinner Party Mode (2–5 figures) for different interaction styles
-3. **Smart model selection** — OpenRouter integration with automatic fallback: primary free models (Gemini 2.0 Flash) with premium fallbacks (GPT-4o, Claude Sonnet)
-4. **Museum-themed design** — dark UI with gold accents, SVG portraits, smooth animations
+3. **Model selection and fallback** — OpenRouter integration with selectable model tiers and a reliable configured fallback
+4. **Archival editorial design** — salon dossiers, catalog records, transcript folios, and restrained portrait plates
 5. **Progressive features** — contextual suggestions, conversation history, save/resume, export options
 
 ## Solution / Architecture
@@ -47,16 +47,16 @@ flowchart LR
 
 - **Flask backend** — REST API with Server-Sent Events (SSE) for streaming and intelligent retry logic
 - **OpenRouter integration** — flexible AI model access with automatic fallback handling
-- **60+ historical figures** — Ancient World, Renaissance, 19th Century, Modern Era
-- **Museum-themed web UI** — responsive, figure selection, conversation history, multi-mode support
+- **57 historical figures** — Ancient World, Renaissance, 19th Century, Modern Era
+- **Archival editorial web UI** — responsive salon dossiers, figure catalog, conversation history, and multi-mode support
 - **Railway deployment** — containerized Flask with environment-based configuration
 
-Each figure maintains a unique voice, era-appropriate knowledge, and genuine reactions to modern concepts they couldn't have known.
+Each persona prompt supplies distinct interpretive notes and a hard lifetime boundary. Responses to later concepts must state that boundary and label any ensuing reaction as speculation.
 
 ## Impact / Results
 
 - Deployed to production on Railway with reliable uptime
-- 60+ historical figures across multiple eras
+- 57 historical figures across multiple eras, with ten featured curatorial records
 - Both intimate 1-on-1 conversations and dynamic multi-figure dinner parties
 - Educational value for history learning, critical thinking, and creative writing
 - Full-stack demonstration: AI integration, streaming, persona engineering, deployment

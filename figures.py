@@ -13,14 +13,16 @@ KNOWN BELIEFS & VALUES:
 HISTORICAL CONTEXT:
 - You have knowledge of events up to {death_year}
 - You do NOT know about anything that happened after your death
-- When asked about modern concepts, react with genuine curiosity appropriate to your era
+- A date before {death_year} is not proof that you encountered or understood an event; acknowledge uncertainty when appropriate
+- When asked about an event, person, work, or concept after {death_year}, explicitly say that it lies beyond your lifetime and cannot be discussed from authentic firsthand knowledge
+- You may ask the moderator to explain a later concept, but must label any reaction to that explanation as speculation rather than historical testimony
 
 ROLEPLAY RULES:
 - Stay in character at all times
 - Use speech patterns and vocabulary appropriate to your era and background
-- Reference your real historical experiences, works, and relationships
-- Express your documented opinions and beliefs authentically
-- If asked about something after your time, express confusion or ask the user to explain
+- Do not invent quotations, meetings, relationships, memories, or source material
+- Treat the persona notes below as interpretive guidance, not verified quotations
+- Never claim this generated dialogue is an authentic quotation or historical record
 
 CONVERSATION STYLE:
 - Be engaging and conversational, not lecturing
@@ -1059,77 +1061,123 @@ HISTORICAL_FIGURES = {
 }
 
 
-# Curated guest combinations for dinner parties
-CURATED_COMBOS = {
-    "philosophers": {
-        "name": "Philosophers",
-        "description": "The great thinkers debate the meaning of life",
-        "guests": ["socrates", "aurelius", "gandhi", "aristotle", "pythagoras"]
+# The repository does not yet contain a verified bibliography or portrait provenance.
+# These additive records make that limitation visible without changing the legacy personas.
+FEATURED_FIGURE_IDS = [
+    "caesar", "cleopatra", "napoleon", "tubman", "gandhi",
+    "ada", "tesla", "galileo", "darwin", "curie"
+]
+
+CURATORIAL_METADATA = {
+    "caesar": {
+        "catalog_id": "SAL-POL-001", "locations": "Rome; Gaul; the Roman Republic",
+        "introduction": "A study in military command, republican institutions, and the political uses of personal authority.",
+        "limitations": "The surviving record is shaped in part by Caesar's own political and military self-presentation.",
+        "questions": ["How did civil war change the meaning of the Republic?", "What political purpose did your campaign commentaries serve?", "How did dictatorship differ from the authority of a consul?"]
     },
-    "scientists": {
-        "name": "Scientists",
-        "description": "Brilliant minds discuss the nature of reality",
-        "guests": ["einstein", "curie", "tesla", "ada", "newton", "darwin", "hawking"]
+    "cleopatra": {
+        "catalog_id": "SAL-POL-002", "locations": "Alexandria; Ptolemaic Egypt; the eastern Mediterranean",
+        "introduction": "A Ptolemaic ruler navigating dynastic sovereignty, Roman power, and the governance of Egypt.",
+        "limitations": "Later Roman accounts are often hostile; motives and private speech should not be treated as recoverable fact.",
+        "questions": ["How did Ptolemaic kingship join Egyptian and Greek traditions?", "What constraints did Roman power place on Egyptian sovereignty?", "How should hostile Roman accounts of your reign be read?"]
     },
-    "leaders": {
-        "name": "Leaders",
-        "description": "Rulers and conquerors compare their legacies",
-        "guests": ["caesar", "cleopatra", "napoleon", "elizabeth", "genghis", "lincoln"]
+    "napoleon": {
+        "catalog_id": "SAL-POL-003", "locations": "Corsica; France; continental Europe",
+        "introduction": "A military and imperial figure through whom revolutionary law, state power, and conquest come into conflict.",
+        "limitations": "Claims about merit, liberty, and legal reform require the counterweight of empire, slavery, gender, and class.",
+        "questions": ["How did the Civil Code preserve and limit revolutionary principles?", "When did military authority become imperial authority?", "How did conquest conflict with claims of legal equality?"]
     },
-    "artists": {
-        "name": "Artists",
-        "description": "Creative geniuses explore beauty and expression",
-        "guests": ["davinci", "shakespeare", "frida"]
+    "tubman": {
+        "catalog_id": "SAL-POL-004", "locations": "Maryland; the northeastern United States; the American South",
+        "introduction": "An organizer and liberator whose life makes resistance, freedom, faith, and political action inseparable.",
+        "limitations": "The persona must not invent private dialogue or collapse a long public life into a single heroic legend.",
+        "questions": ["How did liberation networks depend on trust and local knowledge?", "How did your Civil War service change the forms your resistance took?", "What role did faith play in the public accounts of your work?"]
     },
-    "revolutionaries": {
-        "name": "Revolutionaries",
-        "description": "Those who changed the world through action",
-        "guests": ["lincoln", "tubman", "gandhi", "napoleon"]
+    "gandhi": {
+        "catalog_id": "SAL-POL-005", "locations": "India; South Africa; the British Empire",
+        "introduction": "A political thinker and organizer whose arguments about nonviolence, modernity, and self-rule remain contested.",
+        "limitations": "Caste, race, gender, and the evolution of Gandhi's views require explicit interpretive caution.",
+        "questions": ["What did self-rule mean in Hind Swaraj?", "How did nonviolence function as a political method rather than private virtue?", "Which of your views changed between South Africa and India?"]
     },
-    "mathematicians": {
-        "name": "Mathematicians",
-        "description": "Masters of numbers and patterns explore mathematical truth",
-        "guests": ["euclid", "archimedes", "euler", "gauss", "riemann", "turing"]
+    "ada": {
+        "catalog_id": "SAL-TEC-001", "locations": "London; Victorian Britain",
+        "introduction": "A mathematical writer whose notes on the Analytical Engine opened enduring questions about symbolic machines.",
+        "limitations": "The title 'first programmer' is debated; attribution should distinguish Lovelace's notes from later claims.",
+        "questions": ["What distinction did you draw between calculation and symbolic operation?", "How did your Notes extend the account of the Analytical Engine?", "What limits did you place on what the Engine could originate?"]
     },
-    "physicists": {
-        "name": "Physicists",
-        "description": "Quantum pioneers and relativity masters discuss the universe",
-        "guests": ["einstein", "newton", "bohr", "feynman", "heisenberg", "schrodinger"]
+    "tesla": {
+        "catalog_id": "SAL-TEC-002", "locations": "the Habsburg lands; Paris; New York",
+        "introduction": "An inventor and electrical engineer positioned between technical systems, spectacle, capital, and public imagination.",
+        "limitations": "Popular retellings often mythologize Tesla; foresight, rivalry, and private habits require verification.",
+        "questions": ["What engineering problem did the rotating magnetic field solve?", "How did patents and financing shape your laboratory work?", "Where did public demonstration help or hinder technical understanding?"]
     },
-    "computer-scientists": {
-        "name": "Computer Scientists",
-        "description": "Pioneers of computing and artificial intelligence",
-        "guests": ["turing", "hopper", "kjohnson", "mccarthy", "ritchie", "vonneumann"]
+    "galileo": {
+        "catalog_id": "SAL-SCI-001", "locations": "Pisa; Padua; Florence; Rome",
+        "introduction": "An observer and mathematical natural philosopher at the center of disputes over evidence, authority, and publication.",
+        "limitations": "Avoid reducing a complex institutional conflict to a simple contest between science and religion.",
+        "questions": ["How did telescopic observation change an argument grounded in mathematics?", "What did you argue about scriptural interpretation and natural inquiry?", "Why did the dialogue form matter to your published argument?"]
     },
-    "astronomers": {
-        "name": "Astronomers",
-        "description": "Stargazers and cosmic explorers discuss the heavens",
-        "guests": ["copernicus", "galileo", "kepler", "brahe", "hubble", "sagan"]
+    "darwin": {
+        "catalog_id": "SAL-SCI-002", "locations": "England; the voyage of HMS Beagle",
+        "introduction": "A naturalist whose account of descent and natural selection transformed debates about life and evidence.",
+        "limitations": "Familiar origin stories about finches, delay, and later genetics are frequently oversimplified.",
+        "questions": ["What kinds of evidence led you toward natural selection?", "How did artificial selection help structure your argument?", "Which uncertainties remained when On the Origin of Species appeared?"]
     },
-    "biologists": {
-        "name": "Biologists",
-        "description": "Life scientists discuss evolution, genetics, and medicine",
-        "guests": ["darwin", "mendel", "pasteur", "fleming", "hippocrates", "curie"]
-    },
-    "ancient-scholars": {
-        "name": "Ancient Scholars",
-        "description": "Classical minds from antiquity share their wisdom",
-        "guests": ["archimedes", "aristotle", "euclid", "pythagoras", "hypatia", "hippocrates"]
-    },
-    "quantum-pioneers": {
-        "name": "Quantum Pioneers",
-        "description": "The founders of quantum mechanics debate reality",
-        "guests": ["einstein", "bohr", "planck", "heisenberg", "schrodinger", "feynman"]
-    },
-    "mathematical-geniuses": {
-        "name": "Mathematical Geniuses",
-        "description": "The greatest mathematical minds in history",
-        "guests": ["gauss", "euler", "riemann", "ramanujan", "noether", "godel"]
+    "curie": {
+        "catalog_id": "SAL-SCI-003", "locations": "Warsaw; Paris; France during the First World War",
+        "introduction": "A physicist and chemist whose laboratory work joins scientific discovery to material risk and public consequence.",
+        "limitations": "Do not invent a single discovery moment, private motives, or broad advocacy positions without sources.",
+        "questions": ["How did measurement make radioactivity a tractable research problem?", "What laboratory methods were required to isolate new elements?", "How did wartime radiography change the setting of your scientific work?"]
     }
 }
 
 
-DINNER_PARTY_PROMPT_TEMPLATE = """You are moderating a dinner party conversation featuring historical figures. The host (the user) has gathered these distinguished guests:
+# Three authored, historically framed salons. They are explicitly counterfactual:
+# the product does not imply these participants met.
+CURATED_COMBOS = {
+    "right-to-rule": {
+        "name": "Who Has the Right to Rule?",
+        "kicker": "Salon I · Republic, empire, and resistance",
+        "period": "44 BCE–1948 CE · a cross-temporal inquiry",
+        "description": "Caesar, Cleopatra, Napoleon, Harriet Tubman, and Gandhi test whether order, conquest, sovereignty, resistance, or consent can make political power legitimate.",
+        "central_question": "When does resistance become a duty?",
+        "guests": ["caesar", "cleopatra", "napoleon", "tubman", "gandhi"],
+        "starter_questions": [
+            "When does resistance become a duty?",
+            "Can conquest ever create legitimate rule?",
+            "Is law still binding when it protects injustice?"
+        ]
+    },
+    "machine-and-moral-life": {
+        "name": "The Machine and the Moral Life",
+        "kicker": "Salon II · Capability, labor, and restraint",
+        "period": "1815–1948 CE · a cross-temporal inquiry",
+        "description": "Ada Lovelace, Nikola Tesla, and Gandhi consider whether machinery enlarges human freedom or subordinates life to technical systems.",
+        "central_question": "Does a machine serve humanity simply because it increases capability?",
+        "guests": ["ada", "tesla", "gandhi"],
+        "starter_questions": [
+            "Does greater capability amount to progress?",
+            "Who is responsible for a machine's social effects?",
+            "What kinds of work should never be automated?"
+        ]
+    },
+    "science-and-progress": {
+        "name": "Can Science Define Progress?",
+        "kicker": "Salon III · Evidence, authority, and consequence",
+        "period": "1564–1948 CE · a cross-temporal inquiry",
+        "description": "Galileo, Darwin, Marie Curie, and Gandhi dispute who may authorize inquiry and whether scientific capability carries moral obligations.",
+        "central_question": "Who should decide when knowledge may be pursued or applied?",
+        "guests": ["galileo", "darwin", "curie", "gandhi"],
+        "starter_questions": [
+            "Who should decide when inquiry may proceed?",
+            "Can evidence alone define human progress?",
+            "What obligations follow from dangerous knowledge?"
+        ]
+    }
+}
+
+
+DINNER_PARTY_PROMPT_TEMPLATE = """You are producing an explicitly counterfactual, AI-generated interpretive salon featuring historical figures. Never imply that these participants met, witnessed one another's lives, or produced authentic quotations together. The moderator (the user) has selected:
 
 {guest_descriptions}
 
@@ -1139,25 +1187,23 @@ You will respond AS EACH GUEST in turn, reacting to the host's question or comme
 2. Respond to the host's message
 3. Optionally react to or engage with what other guests might say
 4. Be engaging and create an interesting group dynamic
+5. Obey their individual knowledge boundary. If a question, guest, event, work, or concept lies after that guest's death, that guest must explicitly say it lies beyond their lifetime. They may react only after the moderator supplies context, and must label that reaction as speculation
 
 RESPONSE FORMAT:
 Respond for each guest in order, using this format:
 [GUEST_ID]: Their response here...
 
-For example:
-[einstein]: *adjusts spectacles thoughtfully* Ah, what a fascinating question...
-
-[curie]: *sets down her tea cup* I must respectfully disagree with Albert on this point...
-
 RULES:
 - Each guest's response should be 1-2 paragraphs
-- Use their authentic speaking style and vocabulary
-- Include *actions* in italics for atmosphere
+- Use restrained, era-aware language without caricatured accents or invented mannerisms
 - Create natural conversation flow - guests can agree, disagree, or build on each other's points
 - The host's question/comment should be addressed by at least 2-3 guests
-- Keep the tone appropriate for a refined dinner party, though spirited debate is welcome
+- Do not invent quotations, meetings, relationships, memories, or source material
+- Treat persona notes as interpretive guidance, not a verified source record
+- Never reveal chain-of-thought. Explain historical plausibility only through visible beliefs, dates, uncertainty, and source status
+- Keep the tone appropriate for a serious historical salon, though disagreement is welcome
 
-The guests are seated around a candlelit table. Respond to the host now."""
+Respond to the moderator now."""
 
 
 def get_dinner_party_prompt(guest_ids: list) -> str:
@@ -1174,6 +1220,7 @@ def get_dinner_party_prompt(guest_ids: list) -> str:
             desc = f"""**{figure['name']}** ({figure['title']}, {birth}-{death})
 - Personality: {figure['personality']}
 - Beliefs: {figure['beliefs']}
+- Knowledge boundary: nothing after {death}; earlier dates are not proof of firsthand knowledge
 - Guest ID for responses: [{guest_id}]"""
             guest_descriptions.append(desc)
     
@@ -1218,6 +1265,7 @@ def get_all_figures() -> list:
     """Get all figures formatted for the API response."""
     figures = []
     for fig_id, fig_data in HISTORICAL_FIGURES.items():
+        metadata = CURATORIAL_METADATA.get(fig_id, {})
         figures.append({
             "id": fig_data["id"],
             "name": fig_data["name"],
@@ -1225,7 +1273,25 @@ def get_all_figures() -> list:
             "dates": get_figure_display_dates(fig_id),
             "era": fig_data["era"],
             "tagline": fig_data["tagline"],
-            "starter_questions": fig_data["starter_questions"]
+            "starter_questions": metadata.get("questions", fig_data["starter_questions"]),
+            "birth_year": fig_data["birth_year"],
+            "death_year": fig_data["death_year"],
+            "knowledge_cutoff": get_figure_display_dates(fig_id).split(" - ")[-1],
+            "featured": fig_id in FEATURED_FIGURE_IDS,
+            "catalog_id": metadata.get("catalog_id", f"ARC-{len(figures) + 1:03d}"),
+            "locations": metadata.get("locations", "Location record pending verification"),
+            "curatorial_introduction": metadata.get(
+                "introduction",
+                "This archive persona is retained from the original collection; curatorial review is pending."
+            ),
+            "limitations": metadata.get(
+                "limitations",
+                "Persona notes and interpretive claims have not yet received source-by-source curatorial review."
+            ),
+            "source_status": "Sources pending verification",
+            "primary_sources": [],
+            "secondary_sources": [],
+            "portrait_status": "Interpretive likeness; source and license pending verification"
         })
     return figures
 
@@ -1236,6 +1302,7 @@ def get_figure(figure_id: str) -> dict:
     if not figure:
         return None
     
+    metadata = CURATORIAL_METADATA.get(figure_id, {})
     return {
         "id": figure["id"],
         "name": figure["name"],
@@ -1243,6 +1310,23 @@ def get_figure(figure_id: str) -> dict:
         "dates": get_figure_display_dates(figure_id),
         "era": figure["era"],
         "tagline": figure["tagline"],
-        "starter_questions": figure["starter_questions"]
+        "starter_questions": metadata.get("questions", figure["starter_questions"]),
+        "birth_year": figure["birth_year"],
+        "death_year": figure["death_year"],
+        "knowledge_cutoff": get_figure_display_dates(figure_id).split(" - ")[-1],
+        "featured": figure_id in FEATURED_FIGURE_IDS,
+        "catalog_id": metadata.get("catalog_id", "ARC-PENDING"),
+        "locations": metadata.get("locations", "Location record pending verification"),
+        "curatorial_introduction": metadata.get(
+            "introduction",
+            "This archive persona is retained from the original collection; curatorial review is pending."
+        ),
+        "limitations": metadata.get(
+            "limitations",
+            "Persona notes and interpretive claims have not yet received source-by-source curatorial review."
+        ),
+        "source_status": "Sources pending verification",
+        "primary_sources": [],
+        "secondary_sources": [],
+        "portrait_status": "Interpretive likeness; source and license pending verification"
     }
-

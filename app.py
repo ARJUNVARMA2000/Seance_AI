@@ -23,6 +23,7 @@ from figures import get_all_figures, get_figure, get_system_prompt, get_dinner_p
 load_dotenv()
 
 app = Flask(__name__)
+app.json.sort_keys = False
 
 # Configuration
 OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY')
@@ -108,7 +109,7 @@ def _make_api_request(messages: list, model: str, timeout: int = 30, stream: boo
             json={
                 "model": model,
                 "messages": api_messages,
-                "max_tokens": 500,
+                "max_tokens": 800,
                 "temperature": 0.8,
                 **({"stream": True} if stream else {})
             },
@@ -409,8 +410,7 @@ def api_health():
     """Health check endpoint for Railway monitoring."""
     health_status = {
         "status": "healthy",
-        "api_key_configured": bool(OPENROUTER_API_KEY),
-        "api_key_length": len(OPENROUTER_API_KEY) if OPENROUTER_API_KEY else 0
+        "api_key_configured": bool(OPENROUTER_API_KEY)
     }
     
     if not OPENROUTER_API_KEY:

@@ -3,331 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SeanceAI - Enter the Cosmic Void</title>
-    <meta name="description" content="Enter the cosmic void and commune with the minds of history. Have AI-powered conversations with Einstein, Cleopatra, Da Vinci, and other legendary figures across time and space.">
-
-    <!-- Open Graph / Facebook -->
+    <title>SeanceAI — An Interpretive Historical Salon</title>
+    <meta name="description" content="Enter curated, source-conscious conversations among historical figures. AI-generated interpretation is clearly separated from the historical record.">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="SeanceAI - Enter the Cosmic Void">
-    <meta property="og:description" content="Enter the cosmic void and commune with the minds of history. Have AI-powered conversations with legendary figures across time and space.">
-    <meta property="og:image" content="/static/images/og-preview.png">
-
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="SeanceAI - Enter the Cosmic Void">
-    <meta name="twitter:description" content="Enter the cosmic void and commune with the minds of history. Have AI-powered conversations with legendary figures across time and space.">
-    <meta name="twitter:image" content="/static/images/og-preview.png">
-
-    <!-- Theme Color -->
-    <meta name="theme-color" content="#050510">
-
+    <meta property="og:title" content="SeanceAI — An Interpretive Historical Salon">
+    <meta property="og:description" content="Curated cross-temporal conversations with visible knowledge limits and provenance status.">
+    <meta name="twitter:card" content="summary">
+    <meta name="theme-color" content="#eee8da">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <!-- Cosmic Background Effects -->
-    <div id="star-field" aria-hidden="true"></div>
+    <a class="skip-link" href="#main-content">Skip to content</a>
 
-    <!-- Shooting Stars -->
-    <div class="shooting-star" aria-hidden="true"></div>
-    <div class="shooting-star" aria-hidden="true"></div>
-    <div class="shooting-star" aria-hidden="true"></div>
+    <div class="app-shell">
+        <header class="masthead">
+            <button class="wordmark" type="button" data-tab="dinner-party" aria-label="SeanceAI home">
+                <span class="wordmark-mark" aria-hidden="true">S</span>
+                <span>
+                    <strong>SeanceAI</strong>
+                    <small>Historical Salon &amp; Persona Archive</small>
+                </span>
+            </button>
 
-    <!-- Constellation Canvas -->
-    <canvas id="constellation-canvas" aria-hidden="true"></canvas>
-
-    <!-- Summoning Overlay -->
-    <div id="summoning-overlay" class="summoning-overlay" aria-hidden="true">
-        <div class="summoning-circle">
-            <div class="summoning-ring"></div>
-            <div class="summoning-ring"></div>
-            <div class="summoning-ring"></div>
-            <div id="summoning-portrait" class="summoning-portrait">
-                <img src="" alt="Spirit being summoned">
-            </div>
-        </div>
-    </div>
-
-    <div class="app-container">
-        <!-- Header -->
-        <header class="main-header">
-            <div class="header-actions">
-                <button id="saved-conversations-btn" class="header-action-btn" title="Saved Conversations" aria-label="View saved conversations">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-                    </svg>
-                </button>
-                <a href="https://github.com/ARJUNVARMA2000" target="_blank" rel="noopener noreferrer" 
-                   class="github-link" title="View on GitHub" aria-label="GitHub Profile">
-                    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
-                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                    </svg>
-                </a>
-                <button id="theme-toggle" class="theme-toggle" title="Toggle light/dark mode" aria-label="Toggle theme">
-                    <span class="theme-icon-dark">☽</span>
-                    <span class="theme-icon-light">☀</span>
-                </button>
-            </div>
-            <div class="logo">
-                <span class="logo-icon">☽</span>
-                <h1>SeanceAI</h1>
-            </div>
-            <p class="tagline">Commune with the Minds of History</p>
-            <p class="tagline-sub">AI-powered conversations with 60+ historical figures, from Einstein to Cleopatra</p>
-
-            <!-- Tab Navigation -->
-            <nav class="tab-navigation" id="tab-navigation">
-                <button class="tab-btn active" data-tab="seance">
-                    <span class="tab-icon">☽</span>
-                    <span class="tab-label">Seance</span>
-                </button>
-                <button class="tab-btn" data-tab="dinner-party">
-                    <span class="tab-icon">🍷</span>
-                    <span class="tab-label">Dinner Party</span>
-                </button>
+            <nav class="primary-nav" id="tab-navigation" aria-label="Primary navigation">
+                <button class="tab-btn active" type="button" data-tab="dinner-party" aria-current="page">Curated salons</button>
+                <button class="tab-btn" type="button" data-tab="seance">Figure archive</button>
             </nav>
+
+            <div class="masthead-actions">
+                <button id="saved-conversations-btn" class="text-button" type="button" aria-label="Open saved sessions">Saved sessions</button>
+                <button id="theme-toggle" class="square-button" type="button" aria-label="Toggle reading theme">
+                    <span class="theme-icon-dark" aria-hidden="true">◐</span>
+                    <span class="theme-icon-light" aria-hidden="true">◑</span>
+                </button>
+            </div>
         </header>
 
-        <!-- Figure Selection View -->
-        <main id="selection-view" class="view active">
-            <section class="intro-section">
-                <h2>Choose Your Cosmic Guide</h2>
-                <p class="intro-explainer">Have a one-on-one AI conversation with any historical figure &mdash; ask them anything and they'll respond in character, drawing from their real life, beliefs, and era.</p>
-                <p>Select a luminous soul from across the ages to begin your conversation.</p>
-            </section>
+        <div class="interpretive-banner" role="note">
+            <span class="catalog-label">Interpretive status</span>
+            <p>Dialogue is AI-generated historical interpretation. It is not quotation, testimony, or a record of meetings between participants.</p>
+        </div>
 
-            <!-- Search and Filter Controls -->
-            <div class="filter-controls">
-                <div class="search-wrapper">
-                    <span class="search-icon">🔍</span>
-                    <input
-                        type="text"
-                        id="search-input"
-                        placeholder="Search the cosmos..."
-                        autocomplete="off"
-                    >
-                </div>
-                <div class="era-filter-wrapper">
-                    <select id="era-filter">
-                        <option value="all">All Eras</option>
-                        <option value="Ancient World">Ancient World</option>
-                        <option value="Medieval Era">Medieval Era</option>
-                        <option value="Renaissance">Renaissance</option>
-                        <option value="19th Century">19th Century</option>
-                        <option value="Modern Era">Modern Era</option>
-                    </select>
-                </div>
-            </div>
-
-            <div id="figures-grid" class="figures-grid">
-                <!-- Figures will be dynamically loaded here -->
-                <div class="loading-spinner">
-                    <div class="spinner"></div>
-                    <p>Opening the cosmic portal...</p>
-                </div>
-            </div>
-        </main>
-
-        <!-- Dinner Party Selection View -->
-        <main id="dinner-party-view" class="view">
-            <section class="intro-section">
-                <h2>Host a Celestial Gathering</h2>
-                <p class="intro-explainer">Bring 2&ndash;5 historical figures together for a group conversation. Ask a question and watch Einstein debate with Da Vinci, or Cleopatra challenge Lincoln &mdash; each responds in character, reacting to one another.</p>
-                <p>Select your guests below, or try a curated combination to get started.</p>
-            </section>
-
-            <!-- Curated Combos -->
-            <div class="curated-combos">
-                <p class="combos-label">Cosmic Constellations:</p>
-                <div id="combo-buttons" class="combo-buttons">
-                    <!-- Combo buttons will be dynamically loaded here -->
-                </div>
-            </div>
-
-            <!-- Guest Selection Grid -->
-            <div class="guest-selection-header">
-                <span id="guest-count" class="guest-count">0 guests selected</span>
-                <button id="clear-guests-btn" class="clear-guests-btn" disabled>Clear All</button>
-            </div>
-
-            <div id="guest-grid" class="figures-grid guest-grid">
-                <!-- Figures will be dynamically loaded here -->
-                <div class="loading-spinner">
-                    <div class="spinner"></div>
-                    <p>Scanning the celestial registry...</p>
-                </div>
-            </div>
-
-            <!-- Start Party Button -->
-            <div class="start-party-container">
-                <button id="start-party-btn" class="start-party-btn" disabled>
-                    <span class="party-icon">✨</span>
-                    <span>Begin Celestial Gathering</span>
-                </button>
-                <p class="party-hint">Select 2-5 luminaries to begin</p>
-            </div>
-        </main>
-
-        <!-- Dinner Party Conversation View -->
-        <main id="dinner-party-conversation-view" class="view">
-            <div class="conversation-header dinner-party-header">
-                <button id="party-back-btn" class="back-button" aria-label="Return to guest selection">
-                    <span class="back-arrow">←</span>
-                    <span>Return</span>
-                </button>
-                <div id="party-guests-info" class="party-guests-info">
-                    <!-- Guest portraits will be loaded here -->
-                </div>
-                <div class="model-selector-wrapper">
-                    <select id="party-model-selector" title="Select AI Model">
-                        <!-- Models will be loaded dynamically -->
-                    </select>
-                </div>
-                <button id="party-share-btn" class="share-button" title="Share conversation">
-                    <span class="share-icon">🔗</span>
-                </button>
-                <button id="party-copy-btn" class="copy-button" title="Copy conversation">
-                    <span class="copy-icon">📋</span>
-                </button>
-                <button id="party-download-btn" class="download-button" title="Download conversation">
-                    <span class="download-icon">⬇</span>
-                </button>
-            </div>
-
-            <div id="party-chat-container" class="chat-container">
-                <div id="party-messages" class="messages">
-                    <!-- Messages will be dynamically added here -->
-                </div>
-                
-                <div id="party-typing-indicator" class="typing-indicator hidden">
-                    <div class="typing-dots">
-                        <span></span>
-                        <span></span>
-                        <span></span>
+        <div id="main-content">
+            <main id="dinner-party-view" class="view active" tabindex="-1">
+                <section class="exhibition-hero" aria-labelledby="hero-title">
+                    <div class="hero-copy">
+                        <p class="folio">Featured exhibition · Salon I</p>
+                        <h1 id="hero-title">Who has the<br>right to rule?</h1>
+                        <p class="hero-period">44 BCE–1948 CE · A cross-temporal inquiry</p>
+                        <p class="hero-deck">Five lives place republic, empire, liberation, and civil resistance in direct tension. The question is not which figure “wins,” but what each can and cannot justify from within their own historical world.</p>
+                        <blockquote>
+                            <span>Central disagreement</span>
+                            When does resistance become a duty?
+                        </blockquote>
+                        <button id="hero-enter-btn" class="primary-action" type="button" data-combo="right-to-rule">
+                            Enter this salon <span aria-hidden="true">→</span>
+                        </button>
+                        <p class="hero-disclosure">Counterfactual interpretive simulation · Persona sources pending verification</p>
                     </div>
-                    <span class="typing-text">The cosmic council convenes...</span>
-                </div>
-            </div>
 
-            <form id="party-chat-form" class="chat-form">
-                <div class="input-wrapper">
-                    <input 
-                        type="text" 
-                        id="party-message-input" 
-                        placeholder="Address the table..." 
-                        autocomplete="off"
-                        maxlength="1000"
-                    >
-                    <button type="submit" id="party-send-btn" class="send-button" disabled>
-                        <span class="send-icon">↑</span>
-                    </button>
-                </div>
-            </form>
-            
-            <!-- Suggestion Pills -->
-            <div id="party-suggestions" class="party-suggestions">
-                <div id="party-suggestion-pills" class="suggestion-pills">
-                    <!-- Suggestions will be loaded dynamically -->
-                </div>
-            </div>
-        </main>
-
-        <!-- Conversation View -->
-        <main id="conversation-view" class="view">
-            <div class="conversation-header">
-                <button id="back-btn" class="back-button" aria-label="Return to figure selection">
-                    <span class="back-arrow">←</span>
-                    <span>Return</span>
-                </button>
-                <div id="current-figure-info" class="current-figure-info">
-                    <!-- Figure info will be loaded here -->
-                </div>
-                <div class="branch-selector-wrapper" style="display: none;">
-                    <select id="branch-selector" title="Select conversation branch">
-                        <option value="main">Main</option>
-                    </select>
-                    <button id="create-branch-btn" class="branch-btn" title="Create branch from last message">
-                        <span>🌿</span>
-                    </button>
-                </div>
-                <div class="model-selector-wrapper">
-                    <select id="model-selector" title="Select AI Model">
-                        <!-- Models will be loaded dynamically -->
-                    </select>
-                </div>
-                <button id="share-btn" class="share-button" title="Share conversation">
-                    <span class="share-icon">🔗</span>
-                </button>
-                <button id="copy-btn" class="copy-button" title="Copy conversation">
-                    <span class="copy-icon">📋</span>
-                </button>
-                <button id="download-btn" class="download-button" title="Download conversation">
-                    <span class="download-icon">⬇</span>
-                </button>
-            </div>
-
-            <div id="chat-container" class="chat-container">
-                <div id="messages" class="messages">
-                    <!-- Messages will be dynamically added here -->
-                </div>
-                
-                <div id="typing-indicator" class="typing-indicator hidden">
-                    <div class="typing-dots">
-                        <span></span>
-                        <span></span>
-                        <span></span>
+                    <div class="hero-participants" id="hero-participants" aria-label="Featured salon participants">
+                        <div class="portrait-stack-skeleton" aria-hidden="true"></div>
                     </div>
-                    <span class="typing-text">Channeling through the cosmos...</span>
-                </div>
-            </div>
+                </section>
 
-            <div id="starter-questions" class="starter-questions">
-                <p class="starter-label">Begin your cosmic journey with a question:</p>
-                <div id="question-buttons" class="question-buttons">
-                    <!-- Starter questions will be loaded here -->
-                </div>
-            </div>
+                <section class="salon-index section-rule" aria-labelledby="salon-index-title">
+                    <header class="section-heading">
+                        <div>
+                            <p class="catalog-label">Curated program · 01–03</p>
+                            <h2 id="salon-index-title">Three questions across time</h2>
+                        </div>
+                        <p>Each salon is framed around a documented historical tension. Participants are limited by their lifetimes and may refuse questions outside their temporal knowledge.</p>
+                    </header>
+                    <div id="combo-buttons" class="combo-buttons" aria-live="polite"></div>
+                </section>
 
-            <form id="chat-form" class="chat-form">
-                <div class="input-wrapper">
-                    <input
-                        type="text"
-                        id="message-input"
-                        placeholder="Send your message across the void..."
-                        autocomplete="off"
-                        maxlength="1000"
-                    >
-                    <button type="submit" id="send-btn" class="send-button" disabled>
-                        <span class="send-icon">↑</span>
-                    </button>
-                </div>
-            </form>
-        </main>
+                <section class="featured-collection section-rule" aria-labelledby="featured-title">
+                    <header class="section-heading">
+                        <div>
+                            <p class="catalog-label">Featured collection · 10 records</p>
+                            <h2 id="featured-title">Participants in the program</h2>
+                        </div>
+                        <p>Portraits share one catalog treatment. Image provenance and persona bibliographies remain visibly pending until verified.</p>
+                    </header>
+                    <div id="featured-grid" class="featured-grid" aria-live="polite"></div>
+                </section>
 
-        <!-- Footer -->
+                <section class="custom-salon section-rule" aria-labelledby="custom-salon-title">
+                    <header class="section-heading compact-heading">
+                        <div>
+                            <p class="catalog-label">Open table</p>
+                            <h2 id="custom-salon-title">Assemble a salon from the archive</h2>
+                        </div>
+                        <p>Select two to five figures. Cross-temporal encounters remain interpretive and do not imply historical meetings.</p>
+                    </header>
+                    <div class="guest-selection-header">
+                        <span id="guest-count" class="guest-count" aria-live="polite">0 participants selected</span>
+                        <button id="clear-guests-btn" class="text-button" type="button" disabled>Clear selection</button>
+                    </div>
+                    <div id="guest-grid" class="guest-grid" aria-label="Select salon participants"></div>
+                    <div class="start-party-container">
+                        <button id="start-party-btn" class="secondary-action" type="button" disabled>Open selected salon</button>
+                        <p class="party-hint">Choose 2–5 participants</p>
+                    </div>
+                </section>
+            </main>
+
+            <main id="selection-view" class="view" tabindex="-1">
+                <section class="archive-header" aria-labelledby="archive-title">
+                    <p class="folio">Secondary archive · 57 persona records</p>
+                    <h1 id="archive-title">The figure archive</h1>
+                    <p>Browse every persona retained from the original collection. Featured records include additional curatorial framing; all others remain available with review status disclosed.</p>
+                </section>
+
+                <section class="archive-controls" aria-label="Archive filters">
+                    <label class="field-label" for="search-input">
+                        Search the catalog
+                        <input type="search" id="search-input" placeholder="Name, period, or field" autocomplete="off">
+                    </label>
+                    <label class="field-label" for="era-filter">
+                        Historical period
+                        <select id="era-filter">
+                            <option value="all">All periods</option>
+                            <option value="Ancient World">Ancient World</option>
+                            <option value="Medieval Era">Medieval Era</option>
+                            <option value="Renaissance">Renaissance</option>
+                            <option value="17th-18th Century">17th–18th Century</option>
+                            <option value="18th Century">18th Century</option>
+                            <option value="19th Century">19th Century</option>
+                            <option value="Modern Era">Modern Era</option>
+                        </select>
+                    </label>
+                </section>
+
+                <div id="figures-grid" class="archive-list" aria-live="polite"></div>
+            </main>
+
+            <main id="dinner-party-conversation-view" class="view conversation-view" tabindex="-1">
+                <header class="conversation-header dinner-party-header">
+                    <button id="party-back-btn" class="back-button" type="button" aria-label="Return to curated salons">← Salons</button>
+                    <div id="party-guests-info" class="party-guests-info"></div>
+                    <details class="session-settings">
+                        <summary>Session settings</summary>
+                        <label for="party-model-selector">Language model</label>
+                        <select id="party-model-selector"></select>
+                    </details>
+                    <div class="session-actions" aria-label="Session actions">
+                        <button id="party-share-btn" type="button">Link</button>
+                        <button id="party-copy-btn" type="button">Copy</button>
+                        <button id="party-download-btn" type="button">Export</button>
+                    </div>
+                </header>
+
+                <div class="conversation-grid">
+                    <aside id="party-context-rail" class="context-rail" aria-label="Salon context"></aside>
+
+                    <section class="transcript-column" aria-labelledby="party-transcript-title">
+                        <header class="transcript-heading">
+                            <p class="catalog-label">Generated interpretive transcript</p>
+                            <h1 id="party-transcript-title">Salon transcript</h1>
+                        </header>
+                        <div id="party-chat-container" class="chat-container">
+                            <div id="party-messages" class="messages" role="log" aria-live="polite" aria-relevant="additions"></div>
+                            <div id="party-typing-indicator" class="typing-indicator hidden" role="status">
+                                <span class="scribe-mark" aria-hidden="true"></span>
+                                <span class="typing-text">The next response is being composed…</span>
+                            </div>
+                        </div>
+                        <div id="party-suggestions" class="party-suggestions">
+                            <p class="catalog-label">Questions from the curator</p>
+                            <div id="party-suggestion-pills" class="suggestion-pills"></div>
+                        </div>
+                        <form id="party-chat-form" class="chat-form">
+                            <label for="party-message-input">Question for the salon</label>
+                            <div class="input-wrapper">
+                                <textarea id="party-message-input" rows="2" placeholder="Ask about the central disagreement…" autocomplete="off" maxlength="1000"></textarea>
+                                <button type="submit" id="party-send-btn" class="send-button" disabled>Submit question</button>
+                            </div>
+                            <p>Responses are generated interpretations. Ask participants about events within their lifetimes.</p>
+                        </form>
+                    </section>
+
+                    <aside id="party-provenance-panel" class="provenance-panel" aria-label="Sources and persona limits"></aside>
+                </div>
+            </main>
+
+            <main id="conversation-view" class="view conversation-view" tabindex="-1">
+                <header class="conversation-header">
+                    <button id="back-btn" class="back-button" type="button" aria-label="Return to figure archive">← Archive</button>
+                    <div id="current-figure-info" class="current-figure-info"></div>
+                    <div class="branch-selector-wrapper" hidden>
+                        <label for="branch-selector">Transcript branch</label>
+                        <select id="branch-selector"><option value="main">Main</option></select>
+                        <button id="create-branch-btn" class="text-button" type="button">New branch</button>
+                    </div>
+                    <details class="session-settings">
+                        <summary>Session settings</summary>
+                        <label for="model-selector">Language model</label>
+                        <select id="model-selector"></select>
+                    </details>
+                    <div class="session-actions" aria-label="Session actions">
+                        <button id="share-btn" type="button">Link</button>
+                        <button id="copy-btn" type="button">Copy</button>
+                        <button id="download-btn" type="button">Export</button>
+                    </div>
+                </header>
+
+                <div class="conversation-grid figure-conversation-grid">
+                    <aside id="figure-context-rail" class="context-rail" aria-label="Figure context"></aside>
+                    <section class="transcript-column" aria-labelledby="figure-transcript-title">
+                        <header class="transcript-heading">
+                            <p class="catalog-label">Generated interpretive transcript</p>
+                            <h1 id="figure-transcript-title">Conversation record</h1>
+                        </header>
+                        <div id="chat-container" class="chat-container">
+                            <div id="messages" class="messages" role="log" aria-live="polite" aria-relevant="additions"></div>
+                            <div id="typing-indicator" class="typing-indicator hidden" role="status">
+                                <span class="scribe-mark" aria-hidden="true"></span>
+                                <span class="typing-text">A response is being composed…</span>
+                            </div>
+                        </div>
+                        <div id="starter-questions" class="starter-questions">
+                            <p class="catalog-label">Questions from the catalog</p>
+                            <div id="question-buttons" class="question-buttons"></div>
+                        </div>
+                        <form id="chat-form" class="chat-form">
+                            <label for="message-input">Question for this figure</label>
+                            <div class="input-wrapper">
+                                <textarea id="message-input" rows="2" placeholder="Ask within the figure’s historical context…" autocomplete="off" maxlength="1000"></textarea>
+                                <button type="submit" id="send-btn" class="send-button" disabled>Submit question</button>
+                            </div>
+                            <p>Post-cutoff questions should receive an explicit historical boundary, not invented knowledge.</p>
+                        </form>
+                    </section>
+                    <aside id="figure-provenance-panel" class="provenance-panel" aria-label="Sources and persona limits"></aside>
+                </div>
+            </main>
+        </div>
+
         <footer class="main-footer">
-            <p>SeanceAI &middot; Traversing the Cosmic Void &middot; For educational entertainment only</p>
-            <p class="credit">Created by <a href="https://github.com/ARJUNVARMA2000" target="_blank" rel="noopener noreferrer">Arjun Varma</a></p>
+            <p>SeanceAI · Historical interpretation with visible limits</p>
+            <p>All dialogue is generated. Persona sources and portrait provenance remain pending verification.</p>
+            <a href="https://github.com/ARJUNVARMA2000" target="_blank" rel="noopener noreferrer">Project repository</a>
         </footer>
     </div>
 
-    <!-- Saved Conversations Panel -->
-    <div id="saved-panel" class="saved-panel hidden">
+    <div id="saved-overlay" class="saved-overlay hidden" aria-hidden="true"></div>
+    <aside id="saved-panel" class="saved-panel hidden" role="dialog" aria-modal="true" aria-labelledby="saved-panel-title" tabindex="-1">
         <div class="saved-panel-header">
-            <h3>Saved Conversations</h3>
-            <button id="close-saved-panel" class="close-panel-btn" aria-label="Close panel">×</button>
+            <div>
+                <p class="catalog-label">Local archive</p>
+                <h2 id="saved-panel-title">Saved sessions</h2>
+            </div>
+            <button id="close-saved-panel" class="close-panel-btn" type="button" aria-label="Close saved sessions">Close</button>
         </div>
-        <div id="saved-list" class="saved-list">
-            <!-- Saved conversations will be loaded here -->
-        </div>
-    </div>
-    <div id="saved-overlay" class="saved-overlay hidden"></div>
+        <div id="saved-list" class="saved-list"></div>
+    </aside>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="toast hidden">
+    <div id="toast" class="toast hidden" role="status" aria-live="polite">
         <span id="toast-message"></span>
     </div>
 
     <script src="/static/js/app.js"></script>
 </body>
 </html>
-
