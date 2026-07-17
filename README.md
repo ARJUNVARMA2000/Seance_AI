@@ -1,80 +1,108 @@
 # SeanceAI
 
-Enter curated interpretive salons with 57 historical-figure personas, streaming responses, and visible temporal knowledge boundaries. Every generated conversation is labeled as interpretation rather than quotation or historical record.
+SeanceAI is an archival historical salon for AI-generated interpretive conversations. It pairs curated cross-temporal debates with a searchable archive of 57 historical-figure personas, visible knowledge cutoffs, and honest provenance states.
 
-- **Live demo:** https://seance-ai.up.railway.app
-- **Portfolio:** https://arjun-varma.com/
+[Open the live application](https://seance-ai.up.railway.app/) · [View the portfolio](https://arjun-varma.com/)
 
-## Problem
+> Dialogue is generated historical interpretation—not quotation, testimony, or a record of real meetings. Persona bibliographies and portrait provenance are explicitly marked as pending verification where the repository does not yet contain verified source records.
 
-History education often feels distant and abstract. Students read about historical figures in textbooks but rarely get to experience their personalities, perspectives, or thought processes. Traditional learning methods don't capture authentic voices or contextual knowledge.
+## Screenshots
 
-The goal: a source-conscious educational experience that makes historical viewpoints, disagreement, and temporal limits legible through generated interpretive conversations.
+### Curated salon — desktop
 
-## Challenge
+![SeanceAI desktop landing page showing the Who Has the Right to Rule curated salon](static/images/readme/archival-salon-desktop.png)
 
-- Creating believable personas that speak in era-appropriate language and knowledge
-- Ensuring historical figures don't reference events after their death (temporal knowledge boundaries)
-- Designing an engaging UI that feels like a museum exhibit, not just another chatbot
-- Implementing multi-figure conversations where multiple historical personalities interact naturally
-- Managing API costs and rate limits while providing smooth streaming responses
-- Handling model fallbacks gracefully when primary models hit rate limits
+### Curated salon — mobile
 
-## Approach
+<img src="static/images/readme/archival-salon-mobile.png" alt="SeanceAI mobile landing page showing the Who Has the Right to Rule curated salon" width="390">
 
-1. **Curatorial framework** — persona notes, knowledge boundaries, and interpretive limitations are visible; verified source lists are still pending repository-owner review
-2. **Dual conversation modes** — Seance Mode (1-on-1) and Dinner Party Mode (2–5 figures) for different interaction styles
-3. **Model selection and fallback** — OpenRouter integration with selectable model tiers and a reliable configured fallback
-4. **Archival editorial design** — salon dossiers, catalog records, transcript folios, and restrained portrait plates
-5. **Progressive features** — contextual suggestions, conversation history, save/resume, export options
+## Product
 
-## Solution / Architecture
+### Curated salons
+
+Curated salons are the primary experience. Three authored scenarios begin with a historical disagreement rather than a blank chat box:
+
+1. **Who Has the Right to Rule?** — republic, empire, liberation, and civil resistance
+2. **The Machine and the Moral Life** — capability, labor, and technological restraint
+3. **Can Science Define Progress?** — evidence, authority, and moral consequence
+
+Each salon supports two to five participants, streamed responses, contextual follow-up prompts, transcript export, local save/resume, and same-browser share links.
+
+### Figure archive
+
+All 57 original personas remain accessible through the searchable, period-filtered archive. Ten featured records add curatorial introductions, relevant locations, interpretive limitations, and historically grounded starter questions.
+
+Every figure record exposes:
+
+- lifespan and temporal knowledge cutoff;
+- source-verification and portrait-provenance status;
+- limitations or interpretive uncertainty;
+- a clear separation between catalog context and generated dialogue.
+
+## Architecture
 
 ```mermaid
 flowchart LR
-    U[User] --> F[Flask + SSE]
-    F --> P[Prompt builder<br/>persona + era boundary]
-    P --> OR[OpenRouter]
-    OR -->|primary| G[Gemini 2.0 Flash]
-    OR -->|fallback 1| C[Claude Sonnet 4]
-    OR -->|fallback 2| O[GPT-4o]
-    G --> S[Stream to client]
-    C --> S
-    O --> S
+    U[Browser client] -->|REST + SSE| F[Flask application]
+    F --> P[Persona and temporal-boundary prompts]
+    P --> OR[OpenRouter selected model]
+    OR -->|streamed tokens| F
+    OR -. non-default model failure .-> FB[GPT-4o Mini fallback]
+    FB --> F
+    F --> T[Interpretive transcript UI]
 ```
 
-**Components:**
+- **Backend:** Flask, Requests, Server-Sent Events
+- **Model gateway:** OpenRouter with selectable model tiers and fallback handling
+- **Production server:** Gunicorn with gevent workers for streaming
+- **Frontend:** semantic HTML, CSS, and vanilla JavaScript—no build step
+- **Persistence:** browser `localStorage` for sessions, branches, preferences, and local share links
+- **Deployment:** Railway via the GitHub-linked `main` branch
 
-- **Flask backend** — REST API with Server-Sent Events (SSE) for streaming and intelligent retry logic
-- **OpenRouter integration** — flexible AI model access with automatic fallback handling
-- **57 historical figures** — Ancient World, Renaissance, 19th Century, Modern Era
-- **Archival editorial web UI** — responsive salon dossiers, figure catalog, conversation history, and multi-mode support
-- **Railway deployment** — containerized Flask with environment-based configuration
+## Historical safeguards
 
-Each persona prompt supplies distinct interpretive notes and a hard lifetime boundary. Responses to later concepts must state that boundary and label any ensuing reaction as speculation.
+- Prompts prohibit fabricated quotations, meetings, relationships, memories, and source material.
+- Questions about events after a figure's death require an explicit lifetime boundary.
+- Reactions to later concepts must be labeled as speculation after the moderator supplies context.
+- Cross-temporal salons are labeled counterfactual and never imply that participants met.
+- Missing bibliographies display **Sources pending verification** instead of invented citations.
+- “Why this may be historically plausible” surfaces dates, persona constraints, and uncertainty—not hidden chain-of-thought.
 
-## Impact / Results
+## Run locally
 
-- Deployed to production on Railway with reliable uptime
-- 57 historical figures across multiple eras, with ten featured curatorial records
-- Both intimate 1-on-1 conversations and dynamic multi-figure dinner parties
-- Educational value for history learning, critical thinking, and creative writing
-- Full-stack demonstration: AI integration, streaming, persona engineering, deployment
-
-## Tech Stack
-
-Python · Flask · Server-Sent Events · OpenRouter API · multi-model fallbacks · Railway
-
-## Run Locally
+Requirements: Python 3.10+ and an [OpenRouter](https://openrouter.ai/) API key.
 
 ```bash
 git clone https://github.com/ARJUNVARMA2000/Seance_AI.git
 cd Seance_AI
-cp .env.example .env   # add OPENROUTER_API_KEY
-pip install -r requirements.txt
+cp .env.example .env
+# Add your OPENROUTER_API_KEY to .env
+python -m pip install -r requirements.txt
 python app.py
 ```
 
-## License
+Open `http://localhost:5000`.
 
-MIT
+## Tests
+
+```bash
+python -m unittest discover -s tests -v
+python -m py_compile app.py figures.py tests/test_app.py
+node --check static/js/app.js
+```
+
+The test suite covers catalog preservation, featured metadata, curated-salon limits, temporal prompt safeguards, public routes, API fields, and input validation.
+
+## Deployment
+
+Production is hosted at [seance-ai.up.railway.app](https://seance-ai.up.railway.app/). Railway builds with Nixpacks and starts:
+
+```bash
+gunicorn app:app --config gunicorn_config.py
+```
+
+The linked Railway production service deploys commits pushed to `origin/main`. Runtime configuration, including `OPENROUTER_API_KEY`, is managed in Railway rather than committed to the repository.
+
+## Source status
+
+The product now has a complete provenance interface, but the repository still needs an owner or historian review before any persona can be described as source-verified. Until then, the UI intentionally preserves the pending state.

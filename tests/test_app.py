@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 
 from app import app
 from figures import (
@@ -79,6 +80,42 @@ class RouteTests(unittest.TestCase):
             ).status_code,
             400,
         )
+
+
+class RepositoryHygieneTests(unittest.TestCase):
+    def test_readme_matches_the_current_product_and_embeds_screenshots(self):
+        readme = Path("README.md").read_text(encoding="utf-8")
+        for stale_phrase in ["60+", "Gemini 2.0 Flash", "Seance Mode", "authentic voices"]:
+            self.assertNotIn(stale_phrase, readme)
+        for screenshot in [
+            Path("static/images/readme/archival-salon-desktop.png"),
+            Path("static/images/readme/archival-salon-mobile.png"),
+        ]:
+            self.assertIn(screenshot.as_posix(), readme)
+            self.assertTrue(screenshot.exists())
+            self.assertGreater(screenshot.stat().st_size, 10_000)
+
+    def test_example_environment_file_documents_runtime_configuration(self):
+        example = Path(".env.example").read_text(encoding="utf-8")
+        self.assertIn("OPENROUTER_API_KEY=", example)
+        self.assertNotIn("sk-", example)
+
+    def test_release_configuration_has_no_abandoned_provider_or_model_ids(self):
+        app_source = Path("app.py").read_text(encoding="utf-8")
+        template = Path("templates/index.html").read_text(encoding="utf-8")
+
+        retired_model_ids = (
+            "google/gemma-3-12b-it:free",
+            "google/gemma-3-27b-it:free",
+            "google/gemma-3-4b-it:free",
+            "meta-llama/llama-3.1-405b-instruct:free",
+            "anthropic/claude-3.5-haiku",
+        )
+        for model_id in retired_model_ids:
+            self.assertNotIn(model_id, app_source)
+
+        self.assertFalse(Path("fly.toml").exists())
+        self.assertIn("https://github.com/ARJUNVARMA2000/Seance_AI", template)
 
 
 if __name__ == "__main__":

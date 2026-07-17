@@ -1,6 +1,6 @@
 """
-SeanceAI - Talk to History
-Flask application for conversing with historical figures powered by AI.
+SeanceAI - Interpretive Historical Salon
+Flask application for source-conscious, AI-generated historical interpretation.
 """
 
 # Patch gevent for async support (must be done before other imports)
@@ -35,9 +35,8 @@ MAX_HISTORY = 20  # Maximum number of messages to keep in history
 MAX_RETRIES = 3
 RETRY_DELAYS = [2, 5, 10]  # Exponential backoff delays in seconds
 
-# Fallback models tried (in order) when the primary model fails — rate-limited,
-# unavailable, or returns no content. The chain ends with a reliable paid model so
-# chat never hard-fails, even when OpenRouter's free tier is down or rate-limited.
+# Fallback models tried (in order) when a non-default primary model is rate-limited,
+# unavailable, or returns no content.
 FALLBACK_MODELS = [
     "openai/gpt-4o-mini",  # Cheap, reliable paid model — final safety net
 ]
@@ -48,14 +47,13 @@ MODELS_WITHOUT_SYSTEM_ROLE = {"google/"}
 # Available models - organized by capability tier
 AVAILABLE_MODELS = [
     # Swift tier - fast and responsive (free models)
-    {"id": "google/gemma-3-12b-it:free", "name": "Gemma 3 12B", "tier": "swift"},
-    {"id": "google/gemma-3-27b-it:free", "name": "Gemma 3 27B", "tier": "swift"},
-    {"id": "google/gemma-3-4b-it:free", "name": "Gemma 3 4B", "tier": "swift"},
+    {"id": "google/gemma-4-26b-a4b-it:free", "name": "Gemma 4 26B", "tier": "swift"},
+    {"id": "google/gemma-4-31b-it:free", "name": "Gemma 4 31B", "tier": "swift"},
     {"id": "meta-llama/llama-3.3-70b-instruct:free", "name": "Llama 3.3 70B", "tier": "swift"},
-    {"id": "meta-llama/llama-3.1-405b-instruct:free", "name": "Llama 3.1 405B", "tier": "swift"},
+    {"id": "nousresearch/hermes-3-llama-3.1-405b:free", "name": "Hermes 3 405B", "tier": "swift"},
     # Balanced tier - good mix of speed and capability
     {"id": "openai/gpt-4o-mini", "name": "GPT-4o Mini", "tier": "balanced"},
-    {"id": "anthropic/claude-3.5-haiku", "name": "Claude 3.5 Haiku", "tier": "balanced"},
+    {"id": "anthropic/claude-haiku-4.5", "name": "Claude Haiku 4.5", "tier": "balanced"},
     {"id": "deepseek/deepseek-chat", "name": "DeepSeek V3", "tier": "balanced"},
     # Advanced tier - most capable models
     {"id": "anthropic/claude-sonnet-4", "name": "Claude Sonnet 4", "tier": "advanced"},
@@ -104,7 +102,7 @@ def _make_api_request(messages: list, model: str, timeout: int = 30, stream: boo
                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
                 "Content-Type": "application/json",
                 "HTTP-Referer": request.host_url if request else "http://localhost",
-                "X-Title": "SeanceAI - Talk to History"
+                "X-Title": "SeanceAI - Historical Salon"
             },
             json={
                 "model": model,
@@ -171,7 +169,7 @@ def call_llm_suggestions(messages: list, model: str = None) -> Tuple[str, bool]:
     if not OPENROUTER_API_KEY:
         return ("", True)
     
-    selected_model = model or "google/gemma-3-12b-it:free"
+    selected_model = model or DEFAULT_MODEL
     
     try:
         response = requests.post(
@@ -180,7 +178,7 @@ def call_llm_suggestions(messages: list, model: str = None) -> Tuple[str, bool]:
                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
                 "Content-Type": "application/json",
                 "HTTP-Referer": request.host_url if request else "http://localhost",
-                "X-Title": "SeanceAI - Talk to History"
+                "X-Title": "SeanceAI - Historical Salon"
             },
             json={
                 "model": selected_model,
@@ -269,11 +267,11 @@ def call_llm(messages: list, model: str = None) -> Tuple[str, bool]:
     # All models and retries exhausted
     if last_error and last_error['is_rate_limit']:
         app.logger.error("All models rate-limited")
-        return ("The spirits are overwhelmed with visitors right now. Please wait a moment and try again, or select a different AI model from the dropdown.", True)
+        return ("The model provider is handling too many requests right now. Please wait a moment and try again, or select a different model in session settings.", True)
     elif last_error and last_error.get('status_code') == 401:
         return ("I apologize, but your API key appears to be invalid. Please check your configuration.", True)
     elif last_error and 'timed out' in last_error.get('message', '').lower():
-        return ("The spirits seem distant at the moment. Please try again in a moment.", True)
+        return ("The model provider timed out. Please try again in a moment.", True)
     else:
         app.logger.error(f"All attempts failed. Last error: {last_error}")
         return ("I apologize, but something has disrupted our connection. Please try again.", True)
@@ -368,9 +366,9 @@ def stream_llm(messages: list, model: str = None):
     if not success:
         if last_error and last_error.get('is_rate_limit'):
             app.logger.error("Streaming: All models rate-limited")
-            yield f"data: {json.dumps({'error': 'The spirits are overwhelmed with visitors. Please wait a moment and try again, or select a different AI model.', 'rate_limited': True})}\n\n"
+            yield f"data: {json.dumps({'error': 'The model provider is handling too many requests. Please wait a moment and try again, or select a different model in session settings.', 'rate_limited': True})}\n\n"
         elif last_error and 'timed out' in last_error.get('message', '').lower():
-            yield f"data: {json.dumps({'error': 'The spirits seem distant. Please try again.'})}\n\n"
+            yield f"data: {json.dumps({'error': 'The model provider timed out. Please try again.'})}\n\n"
         else:
             app.logger.error(f"Streaming: All attempts failed. Last error: {last_error}")
             yield f"data: {json.dumps({'error': 'Connection disrupted. Please try again.'})}\n\n"
@@ -894,8 +892,6 @@ Return ONLY the questions, one per line, no numbering."""
     except Exception as e:
         app.logger.error(f"Suggestions error: {e}")
         # Return generic fallback suggestions
-        figure = get_figure(data.get('figure_id', ''))
-        figure_name = figure['name'] if figure else "the spirit"
         return jsonify({
             "suggestions": [
                 "Tell me more about that.",
