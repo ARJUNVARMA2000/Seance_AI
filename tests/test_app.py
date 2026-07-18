@@ -94,6 +94,7 @@ class RepositoryHygieneTests(unittest.TestCase):
             self.assertIn(screenshot.as_posix(), readme)
             self.assertTrue(screenshot.exists())
             self.assertGreater(screenshot.stat().st_size, 10_000)
+            self.assertTrue(screenshot.read_bytes().startswith(b"\x89PNG\r\n\x1a\n"))
 
     def test_example_environment_file_documents_runtime_configuration(self):
         example = Path(".env.example").read_text(encoding="utf-8")
