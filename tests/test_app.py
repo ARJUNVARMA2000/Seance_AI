@@ -1,3 +1,4 @@
+import re
 import unittest
 from pathlib import Path
 
@@ -83,6 +84,15 @@ class RouteTests(unittest.TestCase):
 
 
 class RepositoryHygieneTests(unittest.TestCase):
+    def test_featured_portrait_frame_establishes_a_bounded_box(self):
+        stylesheet = Path("static/css/style.css").read_text(encoding="utf-8")
+        portrait_rule = re.search(r"\.portrait-frame\s*\{(?P<body>[^}]*)\}", stylesheet)
+
+        self.assertIsNotNone(portrait_rule)
+        self.assertIn("display: block;", portrait_rule.group("body"))
+        self.assertIn("width: 100%;", portrait_rule.group("body"))
+        self.assertIn("aspect-ratio: 4 / 5;", portrait_rule.group("body"))
+
     def test_readme_matches_the_current_product_and_embeds_screenshots(self):
         readme = Path("README.md").read_text(encoding="utf-8")
         for stale_phrase in ["60+", "Gemini 2.0 Flash", "Seance Mode", "authentic voices"]:
